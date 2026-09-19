@@ -3,6 +3,8 @@ export const slides = [
   { id: "never-alone", beats: ["alone", "watched", "everywhere"] },
   { id: "who-is-watching", beats: ["who", "reality", "whatNow"] },
   { id: "counted", beats: ["perDay", "foundCamera", "cantDetect"] },
+  { id: "manipulated", beats: ["cloned", "undetected"] },
+  { id: "law-lags", beats: ["watchers", "protections"] },
 ] as const;
 
 export type Beat = (typeof slides)[number]["beats"][number];

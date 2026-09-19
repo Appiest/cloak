@@ -6,6 +6,7 @@ import { pick, quickFade, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Figure } from "../parts/Figure";
 import { countedHero } from "./Counted";
+import { manipulatedHero } from "./Manipulated";
 import type { Beat } from "../script";
 
 const center = standingAt(960, 960, 640);
@@ -19,7 +20,12 @@ const placements: Record<Beat, Placement> = {
   reality: standingAt(960, 930, 230),
   whatNow: standingAt(960, 1000, 420),
   ...countedHero,
+  ...manipulatedHero,
+  watchers: manipulatedHero.undetected,
+  protections: manipulatedHero.undetected,
 };
+
+const hiddenOn: Partial<Record<Beat, boolean>> = { title: true, watchers: true, protections: true };
 
 export function Hero({ beat }: { beat: Beat }) {
   const detected = pick({ watched: 1, everywhere: 1, reality: 1 }, beat, 0);
@@ -29,7 +35,7 @@ export function Hero({ beat }: { beat: Beat }) {
       className="absolute left-0 top-0 origin-top-left"
       style={{ width: figureSize.w, height: figureSize.h }}
       initial={false}
-      animate={{ ...placements[beat], opacity: beat === "title" ? 0 : 1 }}
+      animate={{ ...placements[beat], opacity: hiddenOn[beat] ? 0 : 1 }}
       transition={sceneMove}
     >
       <Pool beat={beat} />

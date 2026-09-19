@@ -22,6 +22,11 @@ export const sources = {
     citation: "FBI IC3, Criminals Use Generative Artificial Intelligence to Facilitate Financial Fraud, 3 December 2024.",
     url: "https://www.ic3.gov/PSA/2024/PSA241203",
   },
+  gaoPrivacyLaw: {
+    citation:
+      "GAO, Facial Recognition Technology: Privacy and Accuracy Issues Related to Commercial Uses. GAO-20-522, July 2020.",
+    url: "https://www.gao.gov/products/gao-20-522",
+  },
   airbnbCameraBan: {
     citation: "Airbnb, An update on our policy on security cameras, 11 March 2024.",
     url: "https://news.airbnb.com/an-update-on-our-policy-on-security-cameras/",
