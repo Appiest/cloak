@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, type MotionValue } from "motion/react";
+import { motion, useMotionValue, useTransform, type MotionValue } from "motion/react";
+import { porchEntrance, porchScale } from "./Porch";
 import { Rig } from "../parts/Rig";
 import { useWalkingPose } from "../parts/useWalkingPose";
 import { figureSize, heroInside, standingAt, monitorTiles, wallTiles, type Placement } from "../geometry";
@@ -38,7 +39,7 @@ const placements: Record<Beat, Placement> = {
   together: standingAt(960, 930, 230),
 };
 
-const hiddenOn: Partial<Record<Beat, boolean>> = { title: true, watchers: true, protections: true, takeHome: true };
+const hiddenOn: Partial<Record<Beat, boolean>> = { title: true, who: true, watchers: true, protections: true, takeHome: true };
 
 const losingLock = {
   animate: { opacity: [0, 1, 1, 0], scale: [1.12, 1, 1, 1.12] },
@@ -52,14 +53,21 @@ function detection(beat: Beat) {
 }
 
 export function Hero({ beat, travel }: { beat: Beat; travel: MotionValue<number> }) {
-  const pose = useWalkingPose(travel, isWalking(beat), streetScale);
+  const heroX = useMotionValue(0);
+  const onPorch = beat === "everywhere";
+  const streetPose = useWalkingPose(travel, isWalking(beat), streetScale);
+  const porchPose = useWalkingPose(useTransform(heroX, (x) => -x), onPorch, porchScale);
+  const pose = onPorch ? porchPose : streetPose;
+  const movement = onPorch
+    ? porchEntrance
+    : { animate: { ...placements[beat], opacity: hiddenOn[beat] ? 0 : 1 }, transition: moveFor(beat) };
   return (
     <motion.div
       className="absolute left-0 top-0 origin-top-left"
-      style={{ width: figureSize.w, height: figureSize.h }}
+      style={{ width: figureSize.w, height: figureSize.h, x: heroX }}
       initial={false}
-      animate={{ ...placements[beat], opacity: hiddenOn[beat] ? 0 : 1 }}
-      transition={moveFor(beat)}
+      animate={movement.animate}
+      transition={movement.transition}
     >
       <Pool beat={beat} />
       <Rig pose={pose} className="relative size-full overflow-visible" />

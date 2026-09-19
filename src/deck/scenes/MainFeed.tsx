@@ -6,6 +6,7 @@ import { moveFor, pick, quickFade } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Osd } from "../parts/Osd";
 import type { Beat } from "../script";
+import { FrontDoor } from "./Porch";
 
 const frames: Partial<Record<Beat, Rect>> = {
   title: screenFeed,
@@ -40,20 +41,8 @@ export function MainFeedFill({ beat }: { beat: Beat }) {
       animate={{ ...frameTarget(beat), opacity }}
       transition={moveFor(beat)}
     >
-      <Hallway />
+      <FrontDoor beat={beat} />
     </motion.div>
-  );
-}
-
-function Hallway() {
-  return (
-    <svg viewBox="0 0 581 464" className="absolute left-0 top-0 h-[464px] w-[581px]" aria-hidden>
-      <rect x="180" y="52" width="220" height="388" fill="var(--color-stage)" />
-      <path d="M172 440V44H408V440" fill="none" stroke="var(--color-feed-raised)" strokeWidth="10" />
-      <rect x="440" y="210" width="16" height="26" fill="var(--color-feed-raised)" />
-      <path d="M70 150h60M84 150v26M116 150v26" stroke="var(--color-feed-raised)" strokeWidth="6" />
-      <path d="M0 440H581" stroke="var(--color-line)" strokeOpacity="0.6" />
-    </svg>
   );
 }
 
