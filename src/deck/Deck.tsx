@@ -4,6 +4,7 @@ import { MotionConfig } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { Scene } from "./Scene";
 import { outline, slides } from "./script";
+import { Rehearsal } from "./Rehearsal";
 import { Stage } from "./Stage";
 import { advance, last, retreat, start, toSearch, type Position } from "./timeline";
 import { useDeckControls } from "./useDeckControls";
@@ -38,6 +39,7 @@ export function Deck({ initial }: { initial: Position }) {
         <Stage>
           <Scene beat={beat} />
         </Stage>
+        <Rehearsal position={position} beat={beat} />
       </main>
     </MotionConfig>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, type MotionValue } from "motion/react";
 import { figureSize, heroInside, standingAt, thumbTiles, wallTiles, type Placement } from "../geometry";
 import { pick, quickFade, sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
@@ -10,15 +10,14 @@ import { manipulatedHero } from "./Manipulated";
 import { infraredHero } from "./Infrared";
 import { revealHero } from "./Reveal";
 import { ultrasonicHero } from "./Ultrasonic";
+import { isWalking, walkHero, walkTransition } from "./WalkHome";
 import { Cap } from "../parts/Cap";
 import { isAtOrAfter, type Beat } from "../script";
 
 const center = standingAt(960, 960, 640);
 
 const placements: Record<Beat, Placement> = {
-  title: center,
-  alone: center,
-  watched: center,
+  ...walkHero,
   everywhere: heroInside(wallTiles[0]),
   who: heroInside(thumbTiles[0]),
   reality: standingAt(960, 930, 230),
@@ -50,19 +49,26 @@ function detection(beat: Beat) {
   return { animate: { opacity: detected, scale: detected ? 1 : 1.12 }, transition: quickFade };
 }
 
-export function Hero({ beat }: { beat: Beat }) {
+export function Hero({ beat, heroX }: { beat: Beat; heroX: MotionValue<number> }) {
   const labelled = pick({ watched: 1 }, beat, 0);
   return (
     <motion.div
       className="absolute left-0 top-0 origin-top-left"
-      style={{ width: figureSize.w, height: figureSize.h }}
+      style={{ width: figureSize.w, height: figureSize.h, x: heroX }}
       initial={false}
       animate={{ ...placements[beat], opacity: hiddenOn[beat] ? 0 : 1 }}
-      transition={sceneMove}
+      transition={walkTransition(beat, sceneMove)}
     >
       <Pool beat={beat} />
-      <Figure className="relative size-full" />
-      <CapLayer beat={beat} />
+      <motion.div
+        className="relative size-full"
+        initial={false}
+        animate={{ y: isWalking(beat) ? [0, -10, 0] : 0, rotate: isWalking(beat) ? [-1.5, 1.5, -1.5] : 0 }}
+        transition={isWalking(beat) ? { duration: 0.9, ease: "easeInOut", repeat: Infinity } : quickFade}
+      >
+        <Figure className="size-full" />
+        <CapLayer beat={beat} />
+      </motion.div>
       <motion.div
         className="absolute -inset-x-10 -inset-y-8"
         initial={false}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMotionValue } from "motion/react";
 import { BackdropWord } from "./scenes/BackdropWord";
 import { Closing, TakeHome } from "./scenes/Closing";
 import { Counted } from "./scenes/Counted";
@@ -15,13 +16,16 @@ import { MainFeedChrome, MainFeedFill } from "./scenes/MainFeed";
 import { Question } from "./scenes/Question";
 import { Reveal } from "./scenes/Reveal";
 import { Title } from "./scenes/Title";
+import { WalkHome } from "./scenes/WalkHome";
 import { SoundRings, Ultrasonic } from "./scenes/Ultrasonic";
 import type { Beat } from "./script";
 
 export function Scene({ beat }: { beat: Beat }) {
+  const heroX = useMotionValue(0);
   return (
     <>
       <BackdropWord beat={beat} />
+      <WalkHome beat={beat} heroX={heroX} />
       <Crowd beat={beat} />
       <MainFeedFill beat={beat} />
       <FeedWall beat={beat} />
@@ -33,7 +37,7 @@ export function Scene({ beat }: { beat: Beat }) {
       <Infrared beat={beat} />
       <Ultrasonic beat={beat} />
       <SoundRings beat={beat} half="back" />
-      <Hero beat={beat} />
+      <Hero beat={beat} heroX={heroX} />
       <InfraredLight beat={beat} />
       <SoundRings beat={beat} half="front" />
       <MainFeedChrome beat={beat} />

@@ -5,13 +5,11 @@ import { pick, sceneMove } from "../motion";
 import type { Beat } from "../script";
 
 const words: Partial<Record<Beat, string>> = {
-  alone: "Never alone",
-  watched: "Never alone",
   humanFirst: "Humans first",
 };
 
 export function BackdropWord({ beat }: { beat: Beat }) {
-  const opacity = pick({ alone: 1, watched: 0.45, humanFirst: 1 }, beat, 0);
+  const opacity = pick({ humanFirst: 1 }, beat, 0);
   const word = words[beat];
   return (
     <AnimatePresence>
