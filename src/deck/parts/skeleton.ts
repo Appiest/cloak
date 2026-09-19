@@ -73,6 +73,10 @@ function segmentAngle(from: Point, to: Point) {
   return Math.atan2(-(to.x - from.x), to.y - from.y) / radians;
 }
 
+function shortestTurn(degrees: number) {
+  return ((((degrees + 180) % 360) + 360) % 360) - 180;
+}
+
 function outermost(first: Point, second: Point) {
   return first.x >= second.x ? first : second;
 }
@@ -92,7 +96,7 @@ export function reachFor(target: Point, turn = 0): Limb {
   );
   const hand = { x: shoulder.x + Math.cos(towardTarget) * distance, y: shoulder.y + Math.sin(towardTarget) * distance };
   const upperAngle = segmentAngle(shoulder, elbow);
-  return { upper: upperAngle, lower: segmentAngle(elbow, hand) - upperAngle };
+  return { upper: upperAngle, lower: shortestTurn(segmentAngle(elbow, hand) - upperAngle) };
 }
 
 const stride = { legSwing: 28, kneeBend: 48, armSwing: 22, elbowBend: 22, bob: 7 };

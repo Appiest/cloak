@@ -7,7 +7,7 @@ import { sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Cap } from "../parts/Cap";
 import { Rig } from "../parts/Rig";
-import { reachFor, restPose, type Pose } from "../parts/skeleton";
+import { handOf, reachFor, restPose, type Limb, type Pose } from "../parts/skeleton";
 import type { Beat } from "../script";
 import { walkStart } from "./WalkHome";
 
@@ -29,28 +29,34 @@ const hunt = {
 const labels = { times: [0, 0.39, 0.41, 0.78, 0.8, 1], searching: [1, 1, 0, 0, 1, 1], found: [0, 0, 1, 1, 0, 0] };
 
 const capGrip = { x: 136, y: 56 };
-const holding = { x: 172, y: 282 };
-const overhead = { x: 178, y: -30 };
-const hanging = { x: 165, y: 297 };
+const holding: Limb = { upper: -12, lower: 8 };
+const raisedOut: Limb = { upper: -95, lower: -12 };
+const overhead: Limb = { upper: -168, lower: -18 };
+const placing = reachFor(capGrip);
+const lowering: Limb = { upper: -60, lower: -8 };
+const hanging: Limb = restPose.frontArm;
 
-const hand = {
-  times: [0, 0.42, 0.5, 0.56, 0.6, 0.66, 0.86, 0.88, 1],
-  x: [holding.x, holding.x, overhead.x, capGrip.x, capGrip.x, hanging.x, hanging.x, holding.x, holding.x],
-  y: [holding.y, holding.y, overhead.y, capGrip.y, capGrip.y, hanging.y, hanging.y, holding.y, holding.y],
+const arm = {
+  times: [0, 0.42, 0.47, 0.51, 0.56, 0.6, 0.635, 0.67, 0.86, 0.88, 1],
+  poses: [holding, holding, raisedOut, overhead, placing, placing, lowering, hanging, hanging, holding, holding],
 };
 
 const worn = { times: [0, 0.559, 0.56, 0.86, 0.861, 1], values: [0, 0, 1, 1, 0, 0] };
-const capTilt = { times: [0, 0.42, 0.5, 0.56, 1], values: [-28, -28, -10, 0, -28] };
+const capTilt = { times: [0, 0.42, 0.51, 0.56, 1], values: [-28, -28, -8, 0, -28] };
 const ledsLit = { times: [0, 0.63, 0.64, 0.65, 0.66, 0.86, 0.861, 1], values: [0, 0, 1, 0.3, 1, 1, 0, 0] };
 const bloom = { times: [0, 0.66, 0.72, 0.86, 0.861, 1], opacity: [0, 0, 1, 1, 0, 0], scale: [0.4, 0.4, 1, 1, 0.4, 0.4] };
 const presence = { times: [0, 0.74, 0.76, 0.77, 0.79, 0.81, 0.9, 1], values: [1, 1, 0.2, 0.9, 0.1, 0, 0, 1] };
 
 const easeInOut = { ease: (t: number) => t * t * (3 - 2 * t) };
-const handX = interpolate(hand.times, hand.x, easeInOut);
-const handY = interpolate(hand.times, hand.y, easeInOut);
+const upperArm = interpolate(arm.times, arm.poses.map((limb) => limb.upper), easeInOut);
+const forearm = interpolate(arm.times, arm.poses.map((limb) => limb.lower), easeInOut);
 
 function titlePose(progress: number): Pose {
-  return { ...restPose, frontArm: reachFor({ x: handX(progress), y: handY(progress) }) };
+  return { ...restPose, frontArm: { upper: upperArm(progress), lower: forearm(progress) } };
+}
+
+function handAt(progress: number) {
+  return handOf(titlePose(progress));
 }
 
 const noSubscription = () => () => {};
@@ -151,8 +157,8 @@ function CloakedPerson({ progress }: LoopProps) {
 
 function HeldCap({ progress }: LoopProps) {
   const onHead = useTransform(progress, worn.times, worn.values);
-  const x = useTransform([progress, onHead], ([at, placed]: number[]) => (1 - placed) * (handX(at) - capGrip.x) * figureUnit);
-  const y = useTransform([progress, onHead], ([at, placed]: number[]) => (1 - placed) * (handY(at) - capGrip.y) * figureUnit);
+  const x = useTransform([progress, onHead], ([at, placed]: number[]) => (1 - placed) * (handAt(at).x - capGrip.x) * figureUnit);
+  const y = useTransform([progress, onHead], ([at, placed]: number[]) => (1 - placed) * (handAt(at).y - capGrip.y) * figureUnit);
   const rotate = useTransform(progress, capTilt.times, capTilt.values);
   const lit = useTransform(progress, ledsLit.times, ledsLit.values);
   return (
