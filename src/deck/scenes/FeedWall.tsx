@@ -65,6 +65,7 @@ const layouts: Partial<Record<Beat, Rect[]>> = {
   everywhere: wallTiles,
   who: thumbTiles,
   demo: wallTiles,
+  video: wallTiles,
 };
 
 function staggersIn(beat: Beat) {
@@ -74,7 +75,7 @@ function staggersIn(beat: Beat) {
 export function FeedWall({ beat }: { beat: Beat }) {
   const rects = layouts[beat] ?? wallTiles;
   const visible = beat in layouts;
-  const showOsd = pick({ everywhere: 1, demo: 1 }, beat, 0);
+  const showOsd = pick({ everywhere: 1, demo: 1, video: 1 }, beat, 0);
   return (
     <>
       {views.map((view, index) => {

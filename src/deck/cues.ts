@@ -51,6 +51,7 @@ export const cues: Record<Beat, Cue | undefined> = {
     line: "and make any audio captured unusable, keeping your voice private and your thoughts secret.",
   },
   demo: { speaker: "Christine", line: "Let’s watch how Cloak protects our friend Alex in this video:" },
+  video: { speaker: "Video", line: "The video plays with sound. Alex speaks when it ends." },
   takeHome: {
     speaker: "Alex",
     line: "That was awesome, but what’s even more awesome, is that we made a model for you to take home.",

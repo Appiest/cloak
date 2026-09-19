@@ -66,6 +66,15 @@
   50% { opacity: 0.25; }
 }
 
+@keyframes ellipsis-grow {
+  from { width: 0; }
+  to { width: 4ch; }
+}
+
+@utility animate-ellipsis {
+  animation: ellipsis-grow 1.6s steps(4, end) infinite;
+}
+
 @utility animate-grain {
   animation: grain-shift 0.6s steps(1) infinite;
 }
@@ -76,7 +85,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-grain,
-  .animate-rec {
+  .animate-rec,
+  .animate-ellipsis {
     animation: none;
   }
 }

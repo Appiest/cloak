@@ -10,7 +10,7 @@ function fitScale(): number {
   return Math.min(window.innerWidth / canvas.w, window.innerHeight / canvas.h);
 }
 
-export function Stage({ children }: { children: ReactNode }) {
+export function Stage({ children, foreground }: { children: ReactNode; foreground?: ReactNode }) {
   const [scale, setScale] = useState(0);
 
   useLayoutEffect(() => {
@@ -49,6 +49,7 @@ export function Stage({ children }: { children: ReactNode }) {
           style={{ backgroundImage: grain }}
           aria-hidden
         />
+        {foreground}
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, type MotionValue } from "motion/react";
+import { Rig } from "../parts/Rig";
+import { useWalkingPose } from "../parts/useWalkingPose";
 import { figureSize, heroInside, standingAt, thumbTiles, wallTiles, type Placement } from "../geometry";
 import { pick, quickFade, sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
-import { Figure } from "../parts/Figure";
 import { countedHero } from "./Counted";
 import { manipulatedHero } from "./Manipulated";
 import { infraredHero } from "./Infrared";
@@ -30,6 +31,7 @@ const placements: Record<Beat, Placement> = {
   ...infraredHero,
   ...ultrasonicHero,
   demo: heroInside(wallTiles[0]),
+  video: heroInside(wallTiles[0]),
   takeHome: standingAt(960, 1400, 640),
   humanFirst: center,
   flock: standingAt(960, 930, 230),
@@ -50,6 +52,7 @@ function detection(beat: Beat) {
 }
 
 export function Hero({ beat, heroX }: { beat: Beat; heroX: MotionValue<number> }) {
+  const pose = useWalkingPose(heroX, isWalking(beat));
   const labelled = pick({ watched: 1 }, beat, 0);
   return (
     <motion.div
@@ -60,15 +63,8 @@ export function Hero({ beat, heroX }: { beat: Beat; heroX: MotionValue<number> }
       transition={walkTransition(beat, sceneMove)}
     >
       <Pool beat={beat} />
-      <motion.div
-        className="relative size-full"
-        initial={false}
-        animate={{ y: isWalking(beat) ? [0, -10, 0] : 0, rotate: isWalking(beat) ? [-1.5, 1.5, -1.5] : 0 }}
-        transition={isWalking(beat) ? { duration: 0.9, ease: "easeInOut", repeat: Infinity } : quickFade}
-      >
-        <Figure className="size-full" />
-        <CapLayer beat={beat} />
-      </motion.div>
+      <Rig pose={pose} className="relative size-full overflow-visible" />
+      <CapLayer beat={beat} />
       <motion.div
         className="absolute -inset-x-10 -inset-y-8"
         initial={false}

@@ -8,7 +8,7 @@ export const slides = [
   { id: "reveal", beats: ["capOn", "parts"] },
   { id: "infrared", beats: ["irLight", "noFace"] },
   { id: "ultrasonic", beats: ["ringOut", "jammed"] },
-  { id: "demo", beats: ["demo"] },
+  { id: "demo", beats: ["demo", "video"] },
   { id: "take-home", beats: ["takeHome"] },
   { id: "closing", beats: ["humanFirst", "flock", "together"] },
 ] as const;

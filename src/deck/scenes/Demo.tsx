@@ -27,7 +27,7 @@ const cameraTiles = [
 const microphoneTile = wallTiles[1 + views.findIndex((view) => !view.face)];
 
 export function Demo({ beat }: { beat: Beat }) {
-  const playing = beat === "demo";
+  const playing = beat === "demo" || beat === "video";
   return (
     <div className="pointer-events-none absolute inset-0" aria-hidden>
       {cameraTiles.map(({ tile, face }, order) => (

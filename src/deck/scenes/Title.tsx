@@ -1,50 +1,73 @@
 "use client";
 
-import { motion } from "motion/react";
-import { sceneEase, sceneMove } from "../motion";
+import { interpolate, motion, useTime, useTransform, type MotionValue } from "motion/react";
+import { useSyncExternalStore } from "react";
 import { figureSize } from "../geometry";
+import { sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Cap } from "../parts/Cap";
-import { Figure } from "../parts/Figure";
+import { Rig } from "../parts/Rig";
+import { reachFor, restPose, type Pose } from "../parts/skeleton";
 import type { Beat } from "../script";
 import { walkStart } from "./WalkHome";
 
 const members = ["Brendan Giang", "Matthew Carlin", "Alex Tully", "Christine Wu", "Ada Morris"];
 
-const loop = { duration: 12, ease: "easeInOut", repeat: Infinity } as const;
-
+const loopMs = 12000;
 const person = walkStart;
 const lock = { x: 1400, y: 300, width: 300, height: 640 };
 const roaming = { width: 220, height: 260 };
 
-const huntTimes = [0, 0.12, 0.24, 0.34, 0.4, 0.72, 0.8, 0.9, 1];
-const huntPath = {
+const hunt = {
+  times: [0, 0.12, 0.24, 0.34, 0.4, 0.8, 0.86, 0.94, 1],
   x: [1180, 420, 760, 1150, lock.x, lock.x, 900, 560, 1180],
   y: [210, 300, 560, 420, lock.y, lock.y, 200, 520, 210],
   width: [roaming.width, roaming.width, roaming.width, roaming.width, lock.width, lock.width, roaming.width, roaming.width, roaming.width],
   height: [roaming.height, roaming.height, roaming.height, roaming.height, lock.height, lock.height, roaming.height, roaming.height, roaming.height],
 };
 
-const labelTimes = [0, 0.39, 0.41, 0.7, 0.72, 1];
-const searchingLabel = [1, 1, 0, 0, 1, 1];
-const personLabel = [0, 0, 1, 1, 0, 0];
+const labels = { times: [0, 0.39, 0.41, 0.78, 0.8, 1], searching: [1, 1, 0, 0, 1, 1], found: [0, 0, 1, 1, 0, 0] };
 
-const presenceTimes = [0, 0.64, 0.66, 0.67, 0.69, 0.71, 0.9, 1];
-const presence = [1, 1, 0.2, 0.9, 0.1, 0, 0, 1];
+const capGrip = { x: 136, y: 56 };
+const holding = { x: 172, y: 282 };
+const overhead = { x: 178, y: -30 };
+const hanging = { x: 165, y: 297 };
 
-const capTimes = [0, 0.43, 0.49, 0.72, 0.73, 1];
-const capDrop = { opacity: [0, 0, 1, 1, 0, 0], y: [-90, -90, 0, 0, -90, -90] };
+const hand = {
+  times: [0, 0.42, 0.5, 0.56, 0.6, 0.66, 0.86, 0.88, 1],
+  x: [holding.x, holding.x, overhead.x, capGrip.x, capGrip.x, hanging.x, hanging.x, holding.x, holding.x],
+  y: [holding.y, holding.y, overhead.y, capGrip.y, capGrip.y, hanging.y, hanging.y, holding.y, holding.y],
+};
 
-const activationTimes = [0, 0.53, 0.54, 0.55, 0.56, 0.72, 0.73, 1];
-const ledsLit = [0, 0, 1, 0.3, 1, 1, 0, 0];
+const worn = { times: [0, 0.559, 0.56, 0.86, 0.861, 1], values: [0, 0, 1, 1, 0, 0] };
+const capTilt = { times: [0, 0.42, 0.5, 0.56, 1], values: [-28, -28, -10, 0, -28] };
+const ledsLit = { times: [0, 0.63, 0.64, 0.65, 0.66, 0.86, 0.861, 1], values: [0, 0, 1, 0.3, 1, 1, 0, 0] };
+const bloom = { times: [0, 0.66, 0.72, 0.86, 0.861, 1], opacity: [0, 0, 1, 1, 0, 0], scale: [0.4, 0.4, 1, 1, 0.4, 0.4] };
+const presence = { times: [0, 0.74, 0.76, 0.77, 0.79, 0.81, 0.9, 1], values: [1, 1, 0.2, 0.9, 0.1, 0, 0, 1] };
 
-const bloomTimes = [0, 0.56, 0.62, 0.72, 0.73, 1];
-const bloom = { opacity: [0, 0, 1, 1, 0, 0], scale: [0.4, 0.4, 1, 1, 0.4, 0.4] };
+const easeInOut = { ease: (t: number) => t * t * (3 - 2 * t) };
+const handX = interpolate(hand.times, hand.x, easeInOut);
+const handY = interpolate(hand.times, hand.y, easeInOut);
 
-const linearLoop = (times: number[]) => ({ ...loop, ease: "linear", times }) as const;
+function titlePose(progress: number): Pose {
+  return { ...restPose, frontArm: reachFor({ x: handX(progress), y: handY(progress) }) };
+}
+
+const noSubscription = () => () => {};
+
+function useIsBrowser() {
+  return useSyncExternalStore(noSubscription, () => true, () => false);
+}
+
+function useLoopProgress() {
+  const time = useTime();
+  return useTransform(time, (elapsed) => (elapsed % loopMs) / loopMs);
+}
 
 export function Title({ beat }: { beat: Beat }) {
   const visible = beat === "title";
+  const progress = useLoopProgress();
+  const inBrowser = useIsBrowser();
   return (
     <motion.div
       className="pointer-events-none absolute inset-0"
@@ -60,8 +83,8 @@ export function Title({ beat }: { beat: Beat }) {
       >
         Cloak
       </motion.h2>
-      <CloakedPerson />
-      <HuntingReticle />
+      {inBrowser && <CloakedPerson progress={progress} />}
+      {inBrowser && <HuntingReticle progress={progress} />}
       <ul className="type-label absolute bottom-[110px] left-[150px] flex gap-14 text-[34px] font-medium text-ink-muted">
         {members.map((name) => (
           <li key={name}>{name}</li>
@@ -71,39 +94,44 @@ export function Title({ beat }: { beat: Beat }) {
   );
 }
 
-function HuntingReticle() {
+type LoopProps = { progress: MotionValue<number> };
+
+function HuntingReticle({ progress }: LoopProps) {
+  const x = useTransform(progress, hunt.times, hunt.x, easeInOut);
+  const y = useTransform(progress, hunt.times, hunt.y, easeInOut);
+  const width = useTransform(progress, hunt.times, hunt.width, easeInOut);
+  const height = useTransform(progress, hunt.times, hunt.height, easeInOut);
+  const searching = useTransform(progress, labels.times, labels.searching);
+  const found = useTransform(progress, labels.times, labels.found);
   return (
-    <motion.div
-      className="absolute left-0 top-0"
-      animate={huntPath}
-      transition={{ ...loop, times: huntTimes }}
-      aria-hidden
-    >
+    <motion.div className="absolute left-0 top-0" style={{ x, y, width, height }} aria-hidden>
       <Brackets arm={36} weight={3} />
-      <motion.span className="absolute -top-10 left-0" animate={{ opacity: searchingLabel }} transition={linearLoop(labelTimes)}>
-        <span className="type-osd animate-rec text-mark">Searching</span>
+      <motion.span className="absolute -top-10 left-0" style={{ opacity: searching }}>
+        <span className="type-osd text-mark">
+          Searching<span className="animate-ellipsis inline-block overflow-hidden align-bottom">...</span>
+        </span>
       </motion.span>
-      <motion.span
-        className="type-osd absolute -top-10 left-0 text-mark"
-        animate={{ opacity: personLabel }}
-        transition={linearLoop(labelTimes)}
-      >
+      <motion.span className="type-osd absolute -top-10 left-0 text-mark" style={{ opacity: found }}>
         Person
       </motion.span>
     </motion.div>
   );
 }
 
-function CloakedPerson() {
+const figureUnit = figureSize.w / 200;
+
+function CloakedPerson({ progress }: LoopProps) {
+  const pose = useTransform(progress, titlePose);
+  const opacity = useTransform(progress, presence.times, presence.values);
+  const bloomOpacity = useTransform(progress, bloom.times, bloom.opacity);
+  const bloomScale = useTransform(progress, bloom.times, bloom.scale);
   return (
     <motion.div
       className="absolute left-0 top-0 origin-top-left"
-      style={{ width: figureSize.w, height: figureSize.h, x: person.x, y: person.y, scale: person.scale }}
-      animate={{ opacity: presence }}
-      transition={linearLoop(presenceTimes)}
+      style={{ width: figureSize.w, height: figureSize.h, x: person.x, y: person.y, scale: person.scale, opacity }}
       aria-hidden
     >
-      <Figure className="absolute inset-0 size-full" />
+      <Rig pose={pose} className="absolute inset-0 size-full overflow-visible" />
       <motion.div
         className="absolute rounded-full mix-blend-screen"
         style={{
@@ -112,19 +140,29 @@ function CloakedPerson() {
           width: 120,
           height: 100,
           background: "radial-gradient(closest-side, oklch(1 0 0) 40%, oklch(1 0 0 / 0.45) 70%, transparent)",
+          opacity: bloomOpacity,
+          scale: bloomScale,
         }}
-        animate={bloom}
-        transition={linearLoop(bloomTimes)}
       />
-      <motion.div
-        className="absolute inset-0"
-        animate={capDrop}
-        transition={{ ...loop, ease: "easeOut", times: capTimes, opacity: linearLoop(capTimes) }}
-      >
-        <Cap className="absolute inset-0 size-full" ledColor="var(--color-cap-shade)" />
-        <motion.div className="absolute inset-0" animate={{ opacity: ledsLit }} transition={linearLoop(activationTimes)}>
-          <Cap glowing className="size-full" />
-        </motion.div>
+      <HeldCap progress={progress} />
+    </motion.div>
+  );
+}
+
+function HeldCap({ progress }: LoopProps) {
+  const onHead = useTransform(progress, worn.times, worn.values);
+  const x = useTransform([progress, onHead], ([at, placed]: number[]) => (1 - placed) * (handX(at) - capGrip.x) * figureUnit);
+  const y = useTransform([progress, onHead], ([at, placed]: number[]) => (1 - placed) * (handY(at) - capGrip.y) * figureUnit);
+  const rotate = useTransform(progress, capTilt.times, capTilt.values);
+  const lit = useTransform(progress, ledsLit.times, ledsLit.values);
+  return (
+    <motion.div
+      className="absolute inset-0"
+      style={{ x, y, rotate, originX: capGrip.x / 200, originY: capGrip.y / 520 }}
+    >
+      <Cap className="absolute inset-0 size-full" ledColor="var(--color-cap-shade)" />
+      <motion.div className="absolute inset-0" style={{ opacity: lit }}>
+        <Cap glowing className="size-full" />
       </motion.div>
     </motion.div>
   );
