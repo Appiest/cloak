@@ -51,6 +51,21 @@ export function standingAt(centerX: number, feetY: number, height: number): Plac
   };
 }
 
+const headCenter = { x: 123, y: 71.3 };
+
+export function headAt(centerX: number, centerY: number, scale: number): Placement {
+  return {
+    x: Math.round(centerX - headCenter.x * scale),
+    y: Math.round(centerY - headCenter.y * scale),
+    scale,
+  };
+}
+
+export function pointOnFigure(placement: Placement, viewBoxX: number, viewBoxY: number) {
+  const unit = (figureSize.w / 200) * placement.scale;
+  return { x: placement.x + viewBoxX * unit, y: placement.y + viewBoxY * unit };
+}
+
 export function tileScale(tile: Rect): number {
   return tile.w / tileSize.w;
 }

@@ -10,6 +10,7 @@ import { Manipulated, SplitBar } from "./scenes/Manipulated";
 import { Timeline } from "./scenes/Timeline";
 import { MainFeedChrome, MainFeedFill } from "./scenes/MainFeed";
 import { Question } from "./scenes/Question";
+import { Reveal } from "./scenes/Reveal";
 import { Title } from "./scenes/Title";
 import type { Beat } from "./script";
 
@@ -28,6 +29,7 @@ export function Scene({ beat }: { beat: Beat }) {
       <Hero beat={beat} />
       <MainFeedChrome beat={beat} />
       <Question beat={beat} />
+      <Reveal beat={beat} />
       <Title beat={beat} />
     </>
   );

@@ -2,12 +2,14 @@
 
 import { motion } from "motion/react";
 import { figureSize, heroInside, standingAt, thumbTiles, wallTiles, type Placement } from "../geometry";
-import { pick, quickFade, sceneMove } from "../motion";
+import { pick, quickFade, sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Figure } from "../parts/Figure";
 import { countedHero } from "./Counted";
 import { manipulatedHero } from "./Manipulated";
-import type { Beat } from "../script";
+import { revealHero } from "./Reveal";
+import { Cap } from "../parts/Cap";
+import { isAtOrAfter, type Beat } from "../script";
 
 const center = standingAt(960, 960, 640);
 
@@ -23,6 +25,7 @@ const placements: Record<Beat, Placement> = {
   ...manipulatedHero,
   watchers: manipulatedHero.undetected,
   protections: manipulatedHero.undetected,
+  ...revealHero,
 };
 
 const hiddenOn: Partial<Record<Beat, boolean>> = { title: true, watchers: true, protections: true };
@@ -40,6 +43,7 @@ export function Hero({ beat }: { beat: Beat }) {
     >
       <Pool beat={beat} />
       <Figure className="relative size-full" />
+      <CapLayer beat={beat} />
       <motion.div
         className="absolute -inset-x-10 -inset-y-8"
         initial={false}
@@ -56,6 +60,20 @@ export function Hero({ beat }: { beat: Beat }) {
           Person
         </motion.span>
       </motion.div>
+    </motion.div>
+  );
+}
+
+function CapLayer({ beat }: { beat: Beat }) {
+  const wearing = isAtOrAfter(beat, "capOn");
+  return (
+    <motion.div
+      className="absolute inset-0"
+      initial={false}
+      animate={{ opacity: wearing ? 1 : 0, y: wearing ? 0 : -70 }}
+      transition={{ duration: 0.8, ease: sceneEase, delay: beat === "capOn" ? 0.7 : 0 }}
+    >
+      <Cap className="size-full" glowing={wearing} />
     </motion.div>
   );
 }
