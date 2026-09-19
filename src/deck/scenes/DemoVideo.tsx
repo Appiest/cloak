@@ -26,6 +26,7 @@ export function DemoVideo({ beat }: { beat: Beat }) {
   return (
     <motion.div
       className="pointer-events-none absolute inset-0 bg-redacted"
+      style={{ x: 0, y: 0, width: "100%", height: "100%" }}
       initial={false}
       animate={{ opacity: playing ? 1 : 0 }}
       transition={{ duration: fadeToBlackSeconds, ease: sceneEase }}
