@@ -2,26 +2,24 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useId } from "react";
-import { figureSize, headAt, pointOnFigure, type Placement, type Rect } from "../geometry";
-import { pick, quickFade, sceneEase, sceneMove } from "../motion";
+import { figureSize, headAt, pointOnFigure, sideFeed, type Placement } from "../geometry";
+import { quickFade, sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Cap, capLeds } from "../parts/Cap";
 import { CountUp } from "../parts/CountUp";
 import { Figure } from "../parts/Figure";
 import { Osd } from "../parts/Osd";
-import { SourceNote } from "../parts/SourceNote";
+import { SourceStack, type SourceBlock } from "../parts/SourceStack";
 import type { Beat } from "../script";
-import { sources, type Source } from "../sources";
+import { sources } from "../sources";
 
 export const infraredHero = {
   irLight: headAt(620, 500, 5.2),
   noFace: headAt(330, 760, 3),
 } satisfies Partial<Record<Beat, Placement>>;
 
-const cameraFeed: Rect = { x: 760, y: 110, w: 1060, h: 640 };
+const cameraFeed = sideFeed;
 const faceInFeed = headAt(cameraFeed.w / 2, 330, 4.8);
-
-type SourceBlock = { list: Source[]; left: number; width: number };
 
 const beatSources: Partial<Record<Beat, SourceBlock>> = {
   irLight: { list: [sources.infraredMask], left: 1120, width: 700 },
@@ -40,7 +38,7 @@ export function Infrared({ beat }: { beat: Beat }) {
             className="absolute left-[1120px] top-[300px] w-[700px]"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
+            exit={{ opacity: 0, y: -12, transition: quickFade }}
             transition={{ ...quickFade, delay: lighting ? 0.6 : 0 }}
           >
             <h2 className="type-display text-[150px] text-ink">Infrared floods your face</h2>
@@ -59,7 +57,7 @@ export function Infrared({ beat }: { beat: Beat }) {
             className="absolute left-[100px] top-[110px] w-[600px]"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, transition: quickFade }}
             transition={{ ...quickFade, delay: 0.4 }}
           >
             <p className="type-display text-[220px] text-ink">
@@ -79,14 +77,14 @@ export function Infrared({ beat }: { beat: Beat }) {
             style={{ left: cameraFeed.x, top: cameraFeed.y + cameraFeed.h + 32, width: cameraFeed.w, textWrap: "pretty" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, transition: quickFade }}
             transition={{ ...quickFade, delay: 1.6 }}
           >
             Many phones filter infrared out of their rear camera, so those lenses can still see your face.
           </motion.p>
         )}
       </AnimatePresence>
-      <SourceLines beat={beat} />
+      <SourceStack beat={beat} blocks={beatSources} />
     </div>
   );
 }
@@ -203,28 +201,5 @@ function SearchingReticle() {
     >
       <Brackets arm={36} weight={3} />
     </motion.div>
-  );
-}
-
-function SourceLines({ beat }: { beat: Beat }) {
-  const block = pick(beatSources, beat, undefined);
-  return (
-    <AnimatePresence mode="wait">
-      {block && (
-        <motion.div
-          key={beat}
-          className="absolute bottom-[48px] space-y-2"
-          style={{ left: block.left, width: block.width }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={quickFade}
-        >
-          {block.list.map((source) => (
-            <SourceNote key={source.url} source={source} />
-          ))}
-        </motion.div>
-      )}
-    </AnimatePresence>
   );
 }

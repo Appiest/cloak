@@ -69,3 +69,5 @@ export function pointOnFigure(placement: Placement, viewBoxX: number, viewBoxY: 
 export function tileScale(tile: Rect): number {
   return tile.w / tileSize.w;
 }
+
+export const sideFeed: Rect = { x: 760, y: 110, w: 1060, h: 640 };

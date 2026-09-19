@@ -13,6 +13,7 @@ import { MainFeedChrome, MainFeedFill } from "./scenes/MainFeed";
 import { Question } from "./scenes/Question";
 import { Reveal } from "./scenes/Reveal";
 import { Title } from "./scenes/Title";
+import { SoundRings, Ultrasonic } from "./scenes/Ultrasonic";
 import type { Beat } from "./script";
 
 export function Scene({ beat }: { beat: Beat }) {
@@ -28,8 +29,11 @@ export function Scene({ beat }: { beat: Beat }) {
       <Timeline beat={beat} />
       <Manipulated beat={beat} />
       <Infrared beat={beat} />
+      <Ultrasonic beat={beat} />
+      <SoundRings beat={beat} half="back" />
       <Hero beat={beat} />
       <InfraredLight beat={beat} />
+      <SoundRings beat={beat} half="front" />
       <MainFeedChrome beat={beat} />
       <Question beat={beat} />
       <Reveal beat={beat} />
