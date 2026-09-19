@@ -6,6 +6,7 @@ export const slides = [
   { id: "manipulated", beats: ["cloned", "undetected"] },
   { id: "law-lags", beats: ["watchers", "protections"] },
   { id: "reveal", beats: ["capOn", "parts"] },
+  { id: "infrared", beats: ["irLight", "noFace"] },
 ] as const;
 
 export type Beat = (typeof slides)[number]["beats"][number];

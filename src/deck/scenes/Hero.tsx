@@ -7,6 +7,7 @@ import { Brackets } from "../parts/Brackets";
 import { Figure } from "../parts/Figure";
 import { countedHero } from "./Counted";
 import { manipulatedHero } from "./Manipulated";
+import { infraredHero } from "./Infrared";
 import { revealHero } from "./Reveal";
 import { Cap } from "../parts/Cap";
 import { isAtOrAfter, type Beat } from "../script";
@@ -26,6 +27,7 @@ const placements: Record<Beat, Placement> = {
   watchers: manipulatedHero.undetected,
   protections: manipulatedHero.undetected,
   ...revealHero,
+  ...infraredHero,
 };
 
 const hiddenOn: Partial<Record<Beat, boolean>> = { title: true, watchers: true, protections: true };

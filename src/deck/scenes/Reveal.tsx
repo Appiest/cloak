@@ -25,7 +25,7 @@ const callouts: Callout[] = [
   {
     title: "Infrared LEDs in the brim",
     side: "left",
-    body: "They shine near-infrared light, which people can’t see, toward camera lenses.",
+    body: "They shine near-infrared light, which people can’t see, onto your face.",
     box: { x: 100, y: 420 },
     target: capAnchors.led,
   },
