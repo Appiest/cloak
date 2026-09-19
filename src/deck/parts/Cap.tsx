@@ -15,12 +15,12 @@ export const capAnchors = {
   transducer: { x: transducerXs[7], y: 48.5 },
 };
 
-type CapProps = { className?: string; glowing?: boolean; ledColor?: string };
+type CapProps = { className?: string; glowing?: boolean; ledColor?: string; cropped?: boolean };
 
-export function Cap({ className, glowing = false, ledColor = "var(--color-mark)" }: CapProps) {
+export function Cap({ className, glowing = false, ledColor = "var(--color-mark)", cropped = false }: CapProps) {
   const shadeId = useId();
   return (
-    <svg viewBox="0 0 200 520" className={className} aria-hidden>
+    <svg viewBox={cropped ? "58 14 84 58" : "0 0 200 520"} className={className} aria-hidden>
       <defs>
         <linearGradient id={shadeId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="var(--color-cap)" />

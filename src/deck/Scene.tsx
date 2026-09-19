@@ -1,6 +1,7 @@
 "use client";
 
 import { BackdropWord } from "./scenes/BackdropWord";
+import { Closing, TakeHome } from "./scenes/Closing";
 import { Counted } from "./scenes/Counted";
 import { Demo } from "./scenes/Demo";
 import { Crowd } from "./scenes/Crowd";
@@ -37,6 +38,8 @@ export function Scene({ beat }: { beat: Beat }) {
       <SoundRings beat={beat} half="front" />
       <MainFeedChrome beat={beat} />
       <Demo beat={beat} />
+      <TakeHome beat={beat} />
+      <Closing beat={beat} />
       <Question beat={beat} />
       <Reveal beat={beat} />
       <Title beat={beat} />

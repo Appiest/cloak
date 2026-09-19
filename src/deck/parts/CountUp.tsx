@@ -8,7 +8,7 @@ type CountUpProps = { value: number; suffix?: string; duration?: number };
 
 export function CountUp({ value, suffix = "", duration = 1.8 }: CountUpProps) {
   const count = useMotionValue(0);
-  const text = useTransform(count, (current) => `${Math.round(current)}${suffix}`);
+  const text = useTransform(count, (current) => `${Math.round(current).toLocaleString("en-US")}${suffix}`);
 
   useEffect(() => {
     const controls = animate(count, value, { duration, ease: sceneEase });

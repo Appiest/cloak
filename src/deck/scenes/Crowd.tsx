@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { figureSize, standingAt } from "../geometry";
 import { pick, sceneEase } from "../motion";
 import { Brackets } from "../parts/Brackets";
+import { Cap } from "../parts/Cap";
 import { Figure } from "../parts/Figure";
 import type { Beat } from "../script";
 
@@ -33,8 +34,9 @@ const people = rows.flatMap((row, rowIndex) => {
 });
 
 export function Crowd({ beat }: { beat: Beat }) {
-  const presence = pick({ reality: 1, whatNow: 0.14 }, beat, 0);
-  const watched = beat === "reality";
+  const presence = pick({ reality: 1, whatNow: 0.14, flock: 1, together: 1 }, beat, 0);
+  const watched = beat === "reality" || beat === "flock";
+  const capped = beat === "together";
   return (
     <motion.div
       className="absolute inset-0"
@@ -55,6 +57,14 @@ export function Crowd({ beat }: { beat: Beat }) {
             transition={{ duration: 0.8, ease: sceneEase, delay: watched ? order * 0.02 : 0 }}
           >
             <Figure mirrored={person.mirrored} className="size-full" />
+            <motion.div
+              className="absolute inset-0"
+              initial={false}
+              animate={{ opacity: capped ? 1 : 0, y: capped ? 0 : -60 }}
+              transition={{ duration: 0.6, ease: sceneEase, delay: capped ? 0.4 + jitter(order + 3) * 1.6 : 0 }}
+            >
+              <Cap className="size-full" glowing={capped} />
+            </motion.div>
             <motion.div
               className="absolute -inset-x-10 -inset-y-8"
               initial={false}

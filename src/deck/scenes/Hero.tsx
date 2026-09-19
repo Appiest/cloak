@@ -31,9 +31,13 @@ const placements: Record<Beat, Placement> = {
   ...infraredHero,
   ...ultrasonicHero,
   demo: heroInside(wallTiles[0]),
+  takeHome: standingAt(960, 1400, 640),
+  humanFirst: center,
+  flock: standingAt(960, 930, 230),
+  together: standingAt(960, 930, 230),
 };
 
-const hiddenOn: Partial<Record<Beat, boolean>> = { title: true, watchers: true, protections: true };
+const hiddenOn: Partial<Record<Beat, boolean>> = { title: true, watchers: true, protections: true, takeHome: true };
 
 const losingLock = {
   animate: { opacity: [0, 1, 1, 0], scale: [1.12, 1, 1, 1.12] },
@@ -42,7 +46,7 @@ const losingLock = {
 
 function detection(beat: Beat) {
   if (beat === "demo") return losingLock;
-  const detected = pick({ watched: 1, everywhere: 1, reality: 1 }, beat, 0);
+  const detected = pick({ watched: 1, everywhere: 1, reality: 1, flock: 1 }, beat, 0);
   return { animate: { opacity: detected, scale: detected ? 1 : 1.12 }, transition: quickFade };
 }
 
@@ -93,7 +97,7 @@ function CapLayer({ beat }: { beat: Beat }) {
 }
 
 function Pool({ beat }: { beat: Beat }) {
-  const opacity = pick({ alone: 1, watched: 1, whatNow: 1 }, beat, 0);
+  const opacity = pick({ alone: 1, watched: 1, whatNow: 1, humanFirst: 1 }, beat, 0);
   return (
     <motion.div
       className="absolute -bottom-16 left-1/2 h-32 w-[520px] -translate-x-1/2 rounded-[50%]"
