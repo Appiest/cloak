@@ -10,6 +10,7 @@ import type { Beat } from "../script";
 const frames: Partial<Record<Beat, Rect>> = {
   title: screenFeed,
   watched: screenFeed,
+  unseen: screenFeed,
   everywhere: wallTiles[0],
   demo: wallTiles[0],
   video: wallTiles[0],
@@ -35,7 +36,7 @@ export function MainFeedFill({ beat }: { beat: Beat }) {
 
 export function MainFeedChrome({ beat }: { beat: Beat }) {
   const visible = beat in frames;
-  const showOsd = pick({ title: 1, watched: 1, everywhere: 1, demo: 1, video: 1 }, beat, 0);
+  const showOsd = pick({ title: 1, watched: 1, unseen: 1, everywhere: 1, demo: 1, video: 1 }, beat, 0);
   return (
     <motion.div
       className="absolute left-0 top-0"

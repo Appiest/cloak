@@ -11,7 +11,7 @@ import { manipulatedHero } from "./Manipulated";
 import { infraredHero } from "./Infrared";
 import { revealHero } from "./Reveal";
 import { ultrasonicHero } from "./Ultrasonic";
-import { isWalking, walkHero, walkTransition } from "./WalkHome";
+import { isWalking, streetScale, walkHero } from "./WalkHome";
 import { Cap } from "../parts/Cap";
 import { isAtOrAfter, type Beat } from "../script";
 
@@ -47,20 +47,19 @@ const losingLock = {
 
 function detection(beat: Beat) {
   if (beat === "demo") return losingLock;
-  const detected = pick({ watched: 1, everywhere: 1, reality: 1, flock: 1 }, beat, 0);
+  const detected = pick({ watched: 1, unseen: 1, everywhere: 1, reality: 1, flock: 1 }, beat, 0);
   return { animate: { opacity: detected, scale: detected ? 1 : 1.12 }, transition: quickFade };
 }
 
-export function Hero({ beat, heroX }: { beat: Beat; heroX: MotionValue<number> }) {
-  const pose = useWalkingPose(heroX, isWalking(beat));
-  const labelled = pick({ watched: 1 }, beat, 0);
+export function Hero({ beat, travel }: { beat: Beat; travel: MotionValue<number> }) {
+  const pose = useWalkingPose(travel, isWalking(beat), streetScale);
   return (
     <motion.div
       className="absolute left-0 top-0 origin-top-left"
-      style={{ width: figureSize.w, height: figureSize.h, x: heroX }}
+      style={{ width: figureSize.w, height: figureSize.h }}
       initial={false}
       animate={{ ...placements[beat], opacity: hiddenOn[beat] ? 0 : 1 }}
-      transition={walkTransition(beat, sceneMove)}
+      transition={sceneMove}
     >
       <Pool beat={beat} />
       <Rig pose={pose} className="relative size-full overflow-visible" />
@@ -71,14 +70,6 @@ export function Hero({ beat, heroX }: { beat: Beat; heroX: MotionValue<number> }
         {...detection(beat)}
       >
         <Brackets arm={56} weight={4} />
-        <motion.span
-          className="type-osd absolute -top-12 left-0 text-[28px] text-mark"
-          initial={false}
-          animate={{ opacity: labelled }}
-          transition={quickFade}
-        >
-          Person
-        </motion.span>
       </motion.div>
     </motion.div>
   );

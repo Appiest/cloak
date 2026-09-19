@@ -1,6 +1,6 @@
 export const slides = [
   { id: "title", beats: ["title"] },
-  { id: "never-alone", beats: ["alone", "watched", "everywhere"] },
+  { id: "never-alone", beats: ["alone", "watched", "unseen", "everywhere"] },
   { id: "who-is-watching", beats: ["who", "reality", "whatNow"] },
   { id: "counted", beats: ["perDay", "foundCamera", "cantDetect"] },
   { id: "manipulated", beats: ["cloned", "undetected"] },

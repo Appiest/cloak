@@ -6,10 +6,11 @@ export const cues: Record<Beat, Cue | undefined> = {
   title: undefined,
   alone: { speaker: "Alex", line: "Imagine a world where you are never completely alone." },
   watched: { speaker: "Matthew", line: "Someone is always watching your actions," },
-  everywhere: { speaker: "Matthew", line: "and nothing you do or say goes unseen or unheard." },
+  unseen: { speaker: "Matthew", line: "and nothing you do or say goes unseen or unheard." },
+  everywhere: { speaker: "Brendan", line: "Do you live in fear of being constantly surveilled?" },
   who: {
     speaker: "Brendan",
-    line: "Do you live in fear of being constantly surveilled? Who is watching you? And what are they doing with the footage and the intelligence gathered?",
+    line: "Who is watching you? And what are they doing with the footage and the intelligence gathered?",
   },
   reality: { speaker: "Christine", line: "We are already heading towards a world where this will be our reality." },
   whatNow: { speaker: "Ada", line: "So when it does happen, what are we going to do? (pause)" },
