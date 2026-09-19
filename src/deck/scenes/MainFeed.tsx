@@ -33,7 +33,7 @@ const onMonitor = {
 };
 
 export function MainFeedFill({ beat }: { beat: Beat }) {
-  const opacity = pick({ everywhere: 1, who: 1, demo: 1, video: 1 }, beat, 0);
+  const opacity = pick({ demo: 1, video: 1 }, beat, 0);
   return (
     <motion.div
       className="absolute left-0 top-0 origin-top-left overflow-hidden bg-feed"
@@ -41,7 +41,7 @@ export function MainFeedFill({ beat }: { beat: Beat }) {
       animate={{ ...frameTarget(beat), opacity }}
       transition={moveFor(beat)}
     >
-      <FrontDoor beat={beat} />
+      <FrontDoor />
     </motion.div>
   );
 }

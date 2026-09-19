@@ -1,10 +1,9 @@
 "use client";
 
-import { motion, useMotionValue, useTransform, type MotionValue } from "motion/react";
-import { porchEntrance, porchScale } from "./Porch";
+import { motion, type MotionValue } from "motion/react";
 import { Rig } from "../parts/Rig";
 import { useWalkingPose } from "../parts/useWalkingPose";
-import { figureSize, heroInside, standingAt, monitorTiles, wallTiles, type Placement } from "../geometry";
+import { figureSize, heroInside, standingAt, wallTiles, type Placement } from "../geometry";
 import { moveFor, pick, quickFade, sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { countedHero } from "./Counted";
@@ -12,7 +11,7 @@ import { manipulatedHero } from "./Manipulated";
 import { infraredHero } from "./Infrared";
 import { revealHero } from "./Reveal";
 import { ultrasonicHero } from "./Ultrasonic";
-import { isWalking, streetScale, walkHero } from "./WalkHome";
+import { isWalking, streetFeedPlacement, streetScale, walkHero } from "./WalkHome";
 import { Cap } from "../parts/Cap";
 import { isAtOrAfter, type Beat } from "../script";
 
@@ -20,8 +19,8 @@ const center = standingAt(960, 960, 640);
 
 const placements: Record<Beat, Placement> = {
   ...walkHero,
-  everywhere: heroInside(wallTiles[0]),
-  who: heroInside(monitorTiles[0]),
+  everywhere: streetFeedPlacement("everywhere"),
+  who: streetFeedPlacement("who"),
   reality: standingAt(960, 930, 230),
   whatNow: standingAt(960, 1000, 420),
   ...countedHero,
@@ -52,32 +51,29 @@ function detection(beat: Beat) {
   return { animate: { opacity: detected, scale: detected ? 1 : 1.12 }, transition: quickFade };
 }
 
-export function Hero({ beat, travel }: { beat: Beat; travel: MotionValue<number> }) {
-  const heroX = useMotionValue(0);
-  const onPorch = beat === "everywhere";
-  const streetPose = useWalkingPose(travel, isWalking(beat), streetScale);
-  const porchPose = useWalkingPose(useTransform(heroX, (x) => -x), onPorch, porchScale);
-  const pose = onPorch ? porchPose : streetPose;
-  const movement = onPorch
-    ? porchEntrance
-    : { animate: { ...placements[beat], opacity: hiddenOn[beat] ? 0 : 1 }, transition: moveFor(beat) };
+type HeroProps = { beat: Beat; travel: MotionValue<number>; presence: MotionValue<number> };
+
+export function Hero({ beat, travel, presence }: HeroProps) {
+  const pose = useWalkingPose(travel, isWalking(beat), streetScale);
   return (
     <motion.div
       className="absolute left-0 top-0 origin-top-left"
-      style={{ width: figureSize.w, height: figureSize.h, x: heroX }}
+      style={{ width: figureSize.w, height: figureSize.h }}
       initial={false}
-      animate={movement.animate}
-      transition={movement.transition}
+      animate={{ ...placements[beat], opacity: hiddenOn[beat] ? 0 : 1 }}
+      transition={moveFor(beat)}
     >
-      <Pool beat={beat} />
-      <Rig pose={pose} className="relative size-full overflow-visible" />
-      <CapLayer beat={beat} />
-      <motion.div
-        className="absolute -inset-x-10 -inset-y-8"
-        initial={false}
-        {...detection(beat)}
-      >
-        <Brackets arm={56} weight={4} />
+      <motion.div className="absolute inset-0" style={{ opacity: presence }}>
+        <Pool beat={beat} />
+        <Rig pose={pose} className="relative size-full overflow-visible" />
+        <CapLayer beat={beat} />
+        <motion.div
+          className="absolute -inset-x-10 -inset-y-8"
+          initial={false}
+          {...detection(beat)}
+        >
+          <Brackets arm={56} weight={4} />
+        </motion.div>
       </motion.div>
     </motion.div>
   );

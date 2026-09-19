@@ -16,19 +16,20 @@ import { Question } from "./scenes/Question";
 import { Reveal } from "./scenes/Reveal";
 import { Title } from "./scenes/Title";
 import { usePullBack, WatchRoom, WatchRoomForeground } from "./scenes/WatchRoom";
-import { useStreetTravel, WalkHome } from "./scenes/WalkHome";
+import { useFrontDoor, useStreetTravel, WalkHome } from "./scenes/WalkHome";
 import { SoundRings, Ultrasonic } from "./scenes/Ultrasonic";
 import type { Beat } from "./script";
 
 export function Scene({ beat }: { beat: Beat }) {
   const travel = useStreetTravel(beat);
   const pull = usePullBack(beat);
+  const { presence, doorOpen } = useFrontDoor(beat, travel);
   return (
     <>
       <BackdropWord beat={beat} />
-      <WalkHome beat={beat} travel={travel} />
       <Crowd beat={beat} />
       <WatchRoom beat={beat} pull={pull} />
+      <WalkHome beat={beat} travel={travel} doorOpen={doorOpen} />
       <MainFeedFill beat={beat} />
       <FeedWall beat={beat} />
       <Counted beat={beat} />
@@ -38,7 +39,7 @@ export function Scene({ beat }: { beat: Beat }) {
       <Infrared beat={beat} />
       <Ultrasonic beat={beat} />
       <SoundRings beat={beat} half="back" />
-      <Hero beat={beat} travel={travel} />
+      <Hero beat={beat} travel={travel} presence={presence} />
       <InfraredLight beat={beat} />
       <SoundRings beat={beat} half="front" />
       <MainFeedChrome beat={beat} />

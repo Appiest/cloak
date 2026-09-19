@@ -3,8 +3,8 @@
 import { Microphone } from "@phosphor-icons/react";
 import { animate, motion, useMotionValue, useTransform, type MotionValue } from "motion/react";
 import { useEffect } from "react";
-import { pointOnFigure, standingAt, type Placement } from "../geometry";
-import { quickFade, sceneEase } from "../motion";
+import { monitorScale, monitorTiles, pointOnFigure, standingAt, wallTiles, type Placement, type Rect } from "../geometry";
+import { moveFor, quickFade, sceneEase } from "../motion";
 import { Noise } from "../parts/Noise";
 import type { Beat } from "../script";
 
@@ -28,9 +28,13 @@ const legs: Partial<Record<Beat, Leg>> = {
   alone: { from: 0, to: 560 },
   watched: { from: 560, to: 1100 },
   unseen: { from: 1100, to: 1640 },
+  everywhere: { from: 1640, to: 1710 },
 };
 
+const feedBeats: Beat[] = ["everywhere", "who"];
+
 const walkingSpeed = 80;
+const longestLeg = 560;
 
 const homeStretch = 1640;
 
@@ -38,12 +42,67 @@ export function isWalking(beat: Beat) {
   return beat in legs;
 }
 
+function isStreetShown(beat: Beat) {
+  return isWalking(beat) || feedBeats.includes(beat);
+}
+
+const cropRegion = { x: 522, y: 380, w: 876, h: 700 };
+
+type Frame = { clip: Rect; scale: number };
+
+function frameFor(beat: Beat): Frame {
+  const fullFrame = { clip: { x: 0, y: 0, w: 1920, h: 1080 }, scale: 1 };
+  if (beat === "everywhere") return { clip: wallTiles[0], scale: wallTiles[0].w / cropRegion.w };
+  if (beat === "who") return { clip: monitorTiles[0], scale: (wallTiles[0].w / cropRegion.w) * monitorScale };
+  return fullFrame;
+}
+
+function croppedBy(frame: Frame) {
+  const cropped = frame.scale !== 1;
+  const origin = cropped ? cropRegion : { x: 0, y: 0 };
+  return {
+    clip: { x: frame.clip.x, y: frame.clip.y, width: frame.clip.w, height: frame.clip.h },
+    inner: { x: -origin.x * frame.scale, y: -origin.y * frame.scale, scale: frame.scale },
+  };
+}
+
+export function streetFeedPlacement(beat: Beat): Placement {
+  const frame = frameFor(beat);
+  const { clip, inner } = croppedBy(frame);
+  return {
+    x: clip.x + inner.x + onStreet.x * frame.scale,
+    y: clip.y + inner.y + onStreet.y * frame.scale,
+    scale: onStreet.scale * frame.scale,
+  };
+}
+
+const doorway = { opens: 0.4, stepsIn: 0.5, closes: 0.5 };
+
+export function useFrontDoor(beat: Beat, travel: MotionValue<number>) {
+  const presence = useMotionValue(1);
+  const doorOpen = useMotionValue(0);
+  useEffect(() => {
+    if (beat !== "everywhere") {
+      presence.set(beat === "who" ? 0 : 1);
+      doorOpen.set(0);
+      return;
+    }
+    const arrival = Math.max(0, (legs.everywhere!.to - travel.get()) / walkingSpeed);
+    const opening = animate(doorOpen, 1, { duration: doorway.opens, delay: arrival, ease: sceneEase });
+    const entering = animate(presence, 0, { duration: doorway.stepsIn, delay: arrival + doorway.opens, ease: "easeIn" });
+    const closing = animate(doorOpen, 0, { duration: doorway.closes, delay: arrival + doorway.opens + doorway.stepsIn + 0.2, ease: sceneEase });
+    return () => [opening, entering, closing].forEach((controls) => controls.stop());
+  }, [beat, travel, presence, doorOpen]);
+  return { presence, doorOpen };
+}
+
 export function useStreetTravel(beat: Beat) {
   const travel = useMotionValue(0);
   useEffect(() => {
     const leg = legs[beat];
     if (!leg) return;
-    if (travel.get() >= leg.to) travel.set(leg.from);
+    const skippedAhead = travel.get() < leg.from - longestLeg;
+    if (travel.get() >= leg.to || skippedAhead) travel.set(leg.from);
     const remaining = leg.to - travel.get();
     const controls = animate(travel, leg.to, { duration: remaining / walkingSpeed, ease: "linear" });
     return () => controls.stop();
@@ -107,24 +166,34 @@ function listeningLine(worldX: number, y: number, travelled: number) {
   return `M${screenX(worldX, travelled) + 28} ${y + 28} L${mouth.x} ${mouth.y}`;
 }
 
-export function WalkHome({ beat, travel }: { beat: Beat; travel: MotionValue<number> }) {
-  const visible = isWalking(beat);
-  const watching = beat === "watched" || beat === "unseen";
-  const listening = beat === "unseen";
+type WalkHomeProps = { beat: Beat; travel: MotionValue<number>; doorOpen: MotionValue<number> };
+
+export function WalkHome({ beat, travel, doorOpen }: WalkHomeProps) {
+  const visible = isStreetShown(beat);
+  const watching = beat !== "alone";
+  const listening = beat !== "alone" && beat !== "watched";
+  const { clip, inner } = croppedBy(frameFor(beat));
+  const move = moveFor(beat);
   return (
     <motion.div
-      className="pointer-events-none absolute inset-0"
+      className="pointer-events-none absolute left-0 top-0 overflow-hidden bg-stage"
       initial={false}
-      animate={{ opacity: visible ? 1 : 0 }}
-      transition={{ duration: 0.8, ease: sceneEase }}
+      animate={{ ...clip, opacity: visible ? 1 : 0 }}
+      transition={{ ...move, opacity: { duration: 0.8, ease: sceneEase } }}
       aria-hidden
     >
+      <motion.div
+        className="absolute left-0 top-0 h-[1080px] w-[1920px] origin-top-left"
+        initial={false}
+        animate={inner}
+        transition={move}
+      >
       <Ground travel={travel} />
       <motion.div className="absolute inset-0" style={{ x: travel }}>
         {lampPosts.map((x) => (
           <LampPost key={x} x={x} />
         ))}
-        <House />
+        <House doorOpen={doorOpen} />
       </motion.div>
       <svg className="absolute inset-0 size-full" viewBox="0 0 1920 1080">
         {cameras.map((camera, index) => (
@@ -141,6 +210,7 @@ export function WalkHome({ beat, travel }: { beat: Beat; travel: MotionValue<num
         {microphones.map((microphone, index) => (
           <ListeningMicrophone key={microphone.x} {...microphone} visible={listening} order={index} />
         ))}
+      </motion.div>
       </motion.div>
     </motion.div>
   );
@@ -176,7 +246,8 @@ function LampPost({ x }: { x: number }) {
   );
 }
 
-function House() {
+function House({ doorOpen }: { doorOpen: MotionValue<number> }) {
+  const doorWidth = useTransform(doorOpen, (open) => 80 * (1 - 0.85 * open));
   return (
     <svg
       className="absolute"
@@ -186,6 +257,7 @@ function House() {
       <path d="M30 200 L240 40 L450 200 V460 H30 Z" fill="var(--color-feed-raised)" />
       <path d="M0 214 L240 26 L480 214" fill="none" stroke="var(--color-line)" strokeWidth="8" />
       <rect x="200" y="300" width="80" height="160" fill="var(--color-stage)" />
+      <motion.rect x="200" y="300" height="160" fill="oklch(0.3 0 0)" style={{ width: doorWidth }} />
       <rect x="340" y="260" width="70" height="70" fill="var(--color-ink-muted)" opacity="0.45" />
       <rect x="70" y="260" width="70" height="70" fill="var(--color-ink-muted)" opacity="0.45" />
     </svg>

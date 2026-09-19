@@ -188,9 +188,12 @@ function Watcher({ visible }: { visible: boolean }) {
 
 function Chair() {
   return (
-    <svg viewBox="0 0 1920 1080" className="absolute inset-0 size-full">
-      <path d="M1190 1300V790C1190 740 1230 710 1280 710H1600C1650 710 1690 740 1690 790V1300Z" fill="var(--color-cap-shade)" />
-      <path d="M1236 806C1236 772 1260 752 1294 752H1586C1620 752 1644 772 1644 806" fill="none" stroke="var(--color-feed-raised)" strokeWidth="10" />
+    <svg viewBox="0 0 1920 1080" className="absolute inset-0 size-full overflow-visible">
+      <path
+        d="M1210 1300V820C1210 760 1250 724 1310 720C1380 716 1520 716 1590 720C1650 724 1690 760 1690 820V1300Z"
+        fill="oklch(0.06 0 0)"
+        style={{ filter: "drop-shadow(-3px -2px 0 oklch(0.55 0.01 250 / 0.45))" }}
+      />
     </svg>
   );
 }
