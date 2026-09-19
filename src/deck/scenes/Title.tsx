@@ -1,12 +1,13 @@
 "use client";
 
-import { interpolate, motion, useTime, useTransform, type MotionValue } from "motion/react";
+import { motion, useTime, useTransform, type MotionValue } from "motion/react";
 import { useSyncExternalStore } from "react";
 import { figureSize } from "../geometry";
 import { sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Cap } from "../parts/Cap";
 import { Rig } from "../parts/Rig";
+import { smoothPath } from "../parts/smoothPath";
 import { handOf, reachFor, restPose, type Limb, type Pose } from "../parts/skeleton";
 import type { Beat } from "../script";
 import { walkStart } from "./WalkHome";
@@ -19,14 +20,14 @@ const lock = { x: 1400, y: 300, width: 300, height: 640 };
 const roaming = { width: 220, height: 260 };
 
 const hunt = {
-  times: [0, 0.12, 0.24, 0.34, 0.4, 0.8, 0.86, 0.94, 1],
+  times: [0, 0.12, 0.24, 0.34, 0.4, 0.84, 0.89, 0.95, 1],
   x: [1180, 420, 760, 1150, lock.x, lock.x, 900, 560, 1180],
   y: [210, 300, 560, 420, lock.y, lock.y, 200, 520, 210],
   width: [roaming.width, roaming.width, roaming.width, roaming.width, lock.width, lock.width, roaming.width, roaming.width, roaming.width],
   height: [roaming.height, roaming.height, roaming.height, roaming.height, lock.height, lock.height, roaming.height, roaming.height, roaming.height],
 };
 
-const labels = { times: [0, 0.39, 0.41, 0.78, 0.8, 1], searching: [1, 1, 0, 0, 1, 1], found: [0, 0, 1, 1, 0, 0] };
+const labels = { times: [0, 0.39, 0.41, 0.82, 0.84, 1], searching: [1, 1, 0, 0, 1, 1], found: [0, 0, 1, 1, 0, 0] };
 
 const capGrip = { x: 136, y: 56 };
 const holding: Limb = { upper: -12, lower: 8 };
@@ -37,19 +38,20 @@ const lowering: Limb = { upper: -60, lower: -8 };
 const hanging: Limb = restPose.frontArm;
 
 const arm = {
-  times: [0, 0.42, 0.47, 0.51, 0.56, 0.6, 0.635, 0.67, 0.86, 0.88, 1],
+  times: [0, 0.42, 0.465, 0.515, 0.57, 0.61, 0.655, 0.7, 0.86, 0.88, 1],
   poses: [holding, holding, raisedOut, overhead, placing, placing, lowering, hanging, hanging, holding, holding],
 };
 
-const worn = { times: [0, 0.559, 0.56, 0.86, 0.861, 1], values: [0, 0, 1, 1, 0, 0] };
-const capTilt = { times: [0, 0.42, 0.51, 0.56, 1], values: [-28, -28, -8, 0, -28] };
-const ledsLit = { times: [0, 0.63, 0.64, 0.65, 0.66, 0.86, 0.861, 1], values: [0, 0, 1, 0.3, 1, 1, 0, 0] };
-const bloom = { times: [0, 0.66, 0.72, 0.86, 0.861, 1], opacity: [0, 0, 1, 1, 0, 0], scale: [0.4, 0.4, 1, 1, 0.4, 0.4] };
-const presence = { times: [0, 0.74, 0.76, 0.77, 0.79, 0.81, 0.9, 1], values: [1, 1, 0.2, 0.9, 0.1, 0, 0, 1] };
+const worn = { times: [0, 0.569, 0.57, 0.86, 0.861, 1], values: [0, 0, 1, 1, 0, 0] };
+const capTilt = { times: [0, 0.42, 0.515, 0.57, 0.86, 0.861, 1], values: [-28, -28, -8, 0, 0, -28, -28] };
+const ledsLit = { times: [0, 0.65, 0.66, 0.67, 0.68, 0.86, 0.861, 1], values: [0, 0, 1, 0.3, 1, 1, 0, 0] };
+const bloom = { times: [0, 0.68, 0.74, 0.86, 0.861, 1], opacity: [0, 0, 1, 1, 0, 0], scale: [0.4, 0.4, 1, 1, 0.4, 0.4] };
+const presence = { times: [0, 0.76, 0.78, 0.79, 0.81, 0.83, 0.9, 1], values: [1, 1, 0.2, 0.9, 0.1, 0, 0, 1] };
 
 const easeInOut = { ease: (t: number) => t * t * (3 - 2 * t) };
-const upperArm = interpolate(arm.times, arm.poses.map((limb) => limb.upper), easeInOut);
-const forearm = interpolate(arm.times, arm.poses.map((limb) => limb.lower), easeInOut);
+const upperArm = smoothPath(arm.times, arm.poses.map((limb) => limb.upper));
+const forearm = smoothPath(arm.times, arm.poses.map((limb) => limb.lower));
+const tiltAt = smoothPath(capTilt.times, capTilt.values);
 
 function titlePose(progress: number): Pose {
   return { ...restPose, frontArm: { upper: upperArm(progress), lower: forearm(progress) } };
@@ -159,7 +161,7 @@ function HeldCap({ progress }: LoopProps) {
   const onHead = useTransform(progress, worn.times, worn.values);
   const x = useTransform([progress, onHead], ([at, placed]: number[]) => (1 - placed) * (handAt(at).x - capGrip.x) * figureUnit);
   const y = useTransform([progress, onHead], ([at, placed]: number[]) => (1 - placed) * (handAt(at).y - capGrip.y) * figureUnit);
-  const rotate = useTransform(progress, capTilt.times, capTilt.values);
+  const rotate = useTransform(progress, tiltAt);
   const lit = useTransform(progress, ledsLit.times, ledsLit.values);
   return (
     <motion.div
