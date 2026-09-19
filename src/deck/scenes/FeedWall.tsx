@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { monitorTiles, tileScale, tileSize, wallTiles, type Rect } from "../geometry";
-import { pick, quickFade, sceneEase } from "../motion";
+import { pick, pullBack, quickFade, sceneMove } from "../motion";
 import { Figure, FigureFromAbove } from "../parts/Figure";
 import { Osd } from "../parts/Osd";
 import { Waveform } from "../parts/Waveform";
@@ -75,7 +75,7 @@ function staggersIn(beat: Beat) {
 export function FeedWall({ beat }: { beat: Beat }) {
   const rects = layouts[beat] ?? wallTiles;
   const visible = beat in layouts;
-  const showOsd = pick({ everywhere: 1, demo: 1, video: 1 }, beat, 0);
+  const showOsd = pick({ everywhere: 1, who: 1, demo: 1, video: 1 }, beat, 0);
   return (
     <>
       {views.map((view, index) => {
@@ -92,11 +92,7 @@ export function FeedWall({ beat }: { beat: Beat }) {
               scale: tileScale(rect) * (visible ? 1 : 0.9),
               opacity: visible ? 1 : 0,
             }}
-            transition={{
-              duration: 1.1,
-              ease: sceneEase,
-              delay: staggersIn(beat) ? 0.25 + index * 0.1 : 0,
-            }}
+            transition={beat === "who" ? pullBack : { ...sceneMove, delay: staggersIn(beat) ? 0.25 + index * 0.1 : 0 }}
           >
             {view.content}
             <div className="absolute inset-0 shadow-[inset_0_0_0_1px_oklch(1_0_0/0.1)]" />

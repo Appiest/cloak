@@ -4,7 +4,7 @@ import { motion, type MotionValue } from "motion/react";
 import { Rig } from "../parts/Rig";
 import { useWalkingPose } from "../parts/useWalkingPose";
 import { figureSize, heroInside, standingAt, monitorTiles, wallTiles, type Placement } from "../geometry";
-import { pick, quickFade, sceneEase, sceneMove } from "../motion";
+import { moveFor, pick, quickFade, sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { countedHero } from "./Counted";
 import { manipulatedHero } from "./Manipulated";
@@ -47,7 +47,7 @@ const losingLock = {
 
 function detection(beat: Beat) {
   if (beat === "demo") return losingLock;
-  const detected = pick({ watched: 1, unseen: 1, everywhere: 1, reality: 1, flock: 1 }, beat, 0);
+  const detected = pick({ watched: 1, unseen: 1, everywhere: 1, who: 1, reality: 1, flock: 1 }, beat, 0);
   return { animate: { opacity: detected, scale: detected ? 1 : 1.12 }, transition: quickFade };
 }
 
@@ -59,7 +59,7 @@ export function Hero({ beat, travel }: { beat: Beat; travel: MotionValue<number>
       style={{ width: figureSize.w, height: figureSize.h }}
       initial={false}
       animate={{ ...placements[beat], opacity: hiddenOn[beat] ? 0 : 1 }}
-      transition={sceneMove}
+      transition={moveFor(beat)}
     >
       <Pool beat={beat} />
       <Rig pose={pose} className="relative size-full overflow-visible" />

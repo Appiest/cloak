@@ -15,19 +15,20 @@ import { MainFeedChrome, MainFeedFill } from "./scenes/MainFeed";
 import { Question } from "./scenes/Question";
 import { Reveal } from "./scenes/Reveal";
 import { Title } from "./scenes/Title";
-import { WatchRoom, WatchRoomForeground } from "./scenes/WatchRoom";
+import { usePullBack, WatchRoom, WatchRoomForeground } from "./scenes/WatchRoom";
 import { useStreetTravel, WalkHome } from "./scenes/WalkHome";
 import { SoundRings, Ultrasonic } from "./scenes/Ultrasonic";
 import type { Beat } from "./script";
 
 export function Scene({ beat }: { beat: Beat }) {
   const travel = useStreetTravel(beat);
+  const pull = usePullBack(beat);
   return (
     <>
       <BackdropWord beat={beat} />
       <WalkHome beat={beat} travel={travel} />
       <Crowd beat={beat} />
-      <WatchRoom beat={beat} />
+      <WatchRoom beat={beat} pull={pull} />
       <MainFeedFill beat={beat} />
       <FeedWall beat={beat} />
       <Counted beat={beat} />
@@ -41,7 +42,7 @@ export function Scene({ beat }: { beat: Beat }) {
       <InfraredLight beat={beat} />
       <SoundRings beat={beat} half="front" />
       <MainFeedChrome beat={beat} />
-      <WatchRoomForeground beat={beat} />
+      <WatchRoomForeground beat={beat} pull={pull} />
       <Demo beat={beat} />
       <TakeHome beat={beat} />
       <Closing beat={beat} />

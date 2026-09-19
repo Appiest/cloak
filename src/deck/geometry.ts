@@ -17,9 +17,9 @@ export const wallTiles: Rect[] = Array.from({ length: 6 }, (_, index) => ({
   ...tileSize,
 }));
 
-export const monitorScreen: Rect = { x: 520, y: 96, w: 880, h: 495 };
+export const monitorScreen: Rect = { x: 60, y: 300, w: 1160, h: 652 };
 
-const monitorScale = monitorScreen.w / canvas.w;
+export const monitorScale = monitorScreen.w / canvas.w;
 
 function onMonitor(rect: Rect): Rect {
   return {

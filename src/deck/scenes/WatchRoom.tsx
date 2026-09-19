@@ -1,31 +1,93 @@
 "use client";
 
-import { motion } from "motion/react";
-import { monitorScreen } from "../geometry";
-import { quickFade, sceneEase, sceneMove } from "../motion";
+import { animate, motion, useMotionValue, useTransform, type MotionValue } from "motion/react";
+import { useEffect, useId } from "react";
+import { canvas, monitorScreen } from "../geometry";
+import { pullBack, quickFade } from "../motion";
 import type { Beat } from "../script";
 
-const bezel = 18;
-const deskTop = monitorScreen.y + monitorScreen.h + 130;
+const bezel = 22;
+const deskTop = monitorScreen.y + monitorScreen.h + 120;
+const framedOnScreen = canvas.w / monitorScreen.w;
 
-const exit = { seconds: 7.2, times: [0, 0.5, 0.625, 1] };
+const dollyAxis = {
+  x: (monitorScreen.x * framedOnScreen) / (framedOnScreen - 1),
+  y: (monitorScreen.y * framedOnScreen) / (framedOnScreen - 1),
+};
 
-export function WatchRoom({ beat }: { beat: Beat }) {
+const watcherDepth = 0.5;
+
+const exit = { standAt: 4.2, standSeconds: 0.8, walkSeconds: 1.8 };
+
+export function usePullBack(beat: Beat) {
+  const roomScale = useMotionValue(framedOnScreen);
+  useEffect(() => {
+    roomScale.set(framedOnScreen);
+    if (beat !== "who") return;
+    const controls = animate(roomScale, 1, pullBack);
+    return () => controls.stop();
+  }, [beat, roomScale]);
+  return roomScale;
+}
+
+function nearLayerScale(roomScale: number) {
+  const distanceToRoom = 1 / roomScale;
+  return (1 - watcherDepth) / (distanceToRoom - watcherDepth);
+}
+
+function useDolly(scale: MotionValue<number>) {
+  const x = useTransform(scale, (k) => dollyAxis.x * (1 - k));
+  const y = useTransform(scale, (k) => dollyAxis.y * (1 - k));
+  return { x, y, scale };
+}
+
+type LayerProps = { beat: Beat; pull: MotionValue<number> };
+
+function useShown(beat: Beat) {
   const visible = beat === "who";
+  return { visible, fade: { opacity: visible ? 1 : 0 }, transition: visible ? { duration: 0 } : quickFade };
+}
+
+export function WatchRoom({ beat, pull }: LayerProps) {
+  const { fade, transition } = useShown(beat);
+  const camera = useDolly(pull);
   return (
-    <motion.div
-      className="pointer-events-none absolute inset-0"
-      initial={false}
-      animate={{ opacity: visible ? 1 : 0 }}
-      transition={{ ...sceneMove, delay: visible ? 0.2 : 0 }}
-      aria-hidden
-    >
+    <motion.div className="pointer-events-none absolute inset-0" initial={false} animate={fade} transition={transition} aria-hidden>
+      <motion.div className="absolute left-0 top-0 origin-top-left" style={{ width: canvas.w, height: canvas.h, ...camera }}>
+        <Room />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export function WatchRoomForeground({ beat, pull }: LayerProps) {
+  const { visible, fade, transition } = useShown(beat);
+  const camera = useDolly(useTransform(pull, nearLayerScale));
+  return (
+    <motion.div className="pointer-events-none absolute inset-0" initial={false} animate={fade} transition={transition} aria-hidden>
+      <motion.div className="absolute left-0 top-0 origin-top-left" style={{ width: canvas.w, height: canvas.h, ...camera }}>
+        <Chair />
+        <Watcher visible={visible} />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function Room() {
+  const glowCenter = `${monitorScreen.x + monitorScreen.w / 2}px ${monitorScreen.y + monitorScreen.h / 2}px`;
+  return (
+    <>
       <div
-        className="absolute inset-0"
+        className="absolute bg-stage"
         style={{
-          background: `radial-gradient(ellipse 900px 620px at ${monitorScreen.x + monitorScreen.w / 2}px ${monitorScreen.y + monitorScreen.h / 2}px, oklch(1 0 0 / 0.07), transparent)`,
+          left: -canvas.w,
+          top: -canvas.h,
+          width: canvas.w * 3,
+          height: canvas.h * 3,
+          background: `radial-gradient(ellipse 1100px 760px at ${glowCenter}, oklch(0.9 0 0 / 0.08), transparent) ${canvas.w}px ${canvas.h}px / ${canvas.w}px ${canvas.h}px no-repeat, var(--color-stage)`,
         }}
       />
+      <SideMonitor />
       <div
         className="absolute bg-feed-raised"
         style={{
@@ -35,56 +97,88 @@ export function WatchRoom({ beat }: { beat: Beat }) {
           height: monitorScreen.h + bezel * 2,
         }}
       />
-      <div className="absolute bg-redacted" style={{ left: monitorScreen.x, top: monitorScreen.y, width: monitorScreen.w, height: monitorScreen.h }} />
       <div
-        className="absolute bg-feed-raised"
-        style={{ left: monitorScreen.x + monitorScreen.w / 2 - 30, top: monitorScreen.y + monitorScreen.h + bezel, width: 60, height: 112 }}
+        className="absolute bg-redacted"
+        style={{ left: monitorScreen.x, top: monitorScreen.y, width: monitorScreen.w, height: monitorScreen.h }}
       />
       <div
         className="absolute bg-feed-raised"
-        style={{ left: monitorScreen.x + monitorScreen.w / 2 - 160, top: deskTop - 14, width: 320, height: 14 }}
+        style={{ left: monitorScreen.x + monitorScreen.w / 2 - 34, top: monitorScreen.y + monitorScreen.h + bezel, width: 68, height: 128 }}
       />
-      <div className="absolute inset-x-0 bottom-0 bg-feed" style={{ top: deskTop }} />
-      <div className="absolute inset-x-0 h-px bg-line/50" style={{ top: deskTop }} />
-    </motion.div>
+      <div className="absolute bg-feed" style={{ left: -1200, right: -1200, top: deskTop, height: 1400 }} />
+      <div className="absolute h-px bg-line/40" style={{ left: -1200, right: -1200, top: deskTop }} />
+      <div
+        className="absolute h-20"
+        style={{
+          left: -1200,
+          right: -1200,
+          top: deskTop,
+          background: `radial-gradient(ellipse 700px 80px at ${monitorScreen.x + monitorScreen.w / 2 + 1200}px 0, oklch(0.9 0 0 / 0.08), transparent)`,
+        }}
+      />
+    </>
   );
 }
 
-export function WatchRoomForeground({ beat }: { beat: Beat }) {
-  const visible = beat === "who";
+function SideMonitor() {
+  const screen = { x: -690, y: 300, w: 620, h: 360 };
   return (
-    <motion.div
-      className="pointer-events-none absolute inset-0"
-      initial={false}
-      animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 160 }}
-      transition={visible ? { ...sceneMove, delay: 0.3 } : quickFade}
-      aria-hidden
-    >
-      <Watcher visible={visible} />
-      <Chair visible={visible} />
-    </motion.div>
+    <>
+      <div className="absolute bg-feed-raised" style={{ left: screen.x - 16, top: screen.y - 16, width: screen.w + 32, height: screen.h + 32 }} />
+      <div
+        className="absolute grid grid-cols-4 gap-1.5 bg-redacted p-1.5"
+        style={{ left: screen.x, top: screen.y, width: screen.w, height: screen.h }}
+      >
+        {Array.from({ length: 12 }, (_, index) => (
+          <div key={index} className="bg-feed" />
+        ))}
+      </div>
+    </>
   );
 }
+
+const cloak =
+  "M-120 1800V990C0 900 150 862 262 842C330 800 352 760 350 700C340 610 362 500 430 420C480 362 548 330 612 318C640 350 700 404 730 470C770 560 772 650 748 724C742 748 752 768 780 782C940 812 1170 858 1330 950C1430 1010 1500 1090 1530 1800Z";
 
 function Watcher({ visible }: { visible: boolean }) {
+  const lightId = useId();
+  const total = exit.standAt + exit.standSeconds + exit.walkSeconds;
   return (
     <motion.div
-      className="absolute left-[380px] top-[500px] h-[700px] w-[600px]"
+      className="absolute inset-0"
       initial={false}
-      animate={visible ? { x: [0, 0, 0, 1800], y: [0, 0, -170, -150] } : { x: 0, y: 0 }}
-      transition={visible ? { duration: exit.seconds, times: exit.times, ease: sceneEase, delay: 1.2 } : { duration: 0 }}
+      animate={visible ? { x: [0, 0, -60, -2400], y: [0, 0, -560, -540] } : { x: 0, y: 0 }}
+      transition={
+        visible
+          ? {
+              duration: total,
+              times: [0, exit.standAt / total, (exit.standAt + exit.standSeconds) / total, 1],
+              ease: ["linear", "easeOut", "easeIn"],
+            }
+          : { duration: 0 }
+      }
     >
       <motion.div
-        className="size-full"
+        className="absolute inset-0 origin-bottom"
         initial={false}
-        animate={visible ? { y: [0, -10, 0] } : { y: 0 }}
-        transition={{ duration: 0.55, repeat: Infinity, ease: "easeInOut", delay: 1.2 + exit.seconds * exit.times[2] }}
+        animate={visible ? { y: [0, -6, 0], rotate: [0, 0.6, 0] } : { y: 0, rotate: 0 }}
+        transition={{ duration: 3.4, ease: "easeInOut", repeat: Infinity }}
       >
-        <svg viewBox="0 0 600 700" className="size-full overflow-visible">
+        <svg viewBox="0 0 1920 1080" className="absolute inset-0 size-full overflow-visible">
+          <defs>
+            <linearGradient id={lightId} x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+              <stop offset="0" stopColor="oklch(0.035 0 0)" />
+              <stop offset="0.42" stopColor="oklch(0.05 0 0)" />
+              <stop offset="0.52" stopColor="oklch(0.1 0.005 250)" />
+              <stop offset="0.6" stopColor="oklch(0.045 0 0)" />
+              <stop offset="1" stopColor="oklch(0.07 0.005 250)" />
+            </linearGradient>
+          </defs>
           <path
-            d="M300 40C220 40 170 100 165 180C160 250 180 300 200 330C120 350 40 390 20 470L0 700H600L580 470C560 390 480 350 400 330C420 300 440 250 435 180C430 100 380 40 300 40Z"
-            fill="oklch(0.09 0 0)"
-            style={{ filter: "drop-shadow(0 -2px 0 oklch(0.55 0 0 / 0.7)) drop-shadow(0 0 40px oklch(0.8 0 0 / 0.12))" }}
+            d={cloak}
+            transform="translate(1920 0) scale(-1 1) translate(-110 -200) scale(1.05)"
+            fill={`url(#${lightId})`}
+            style={{ filter: "drop-shadow(-4px -3px 0 oklch(0.62 0.01 250 / 0.5)) drop-shadow(0 0 80px oklch(0.85 0 0 / 0.09))" }}
           />
         </svg>
       </motion.div>
@@ -92,18 +186,11 @@ function Watcher({ visible }: { visible: boolean }) {
   );
 }
 
-function Chair({ visible }: { visible: boolean }) {
+function Chair() {
   return (
-    <motion.div
-      className="absolute left-[470px] top-[780px] h-[340px] w-[420px] origin-bottom"
-      initial={false}
-      animate={visible ? { x: [0, 0, 30, 30], rotate: [0, 0, -4, 0] } : { x: 0, rotate: 0 }}
-      transition={visible ? { duration: exit.seconds, times: exit.times, ease: sceneEase, delay: 1.2 } : { duration: 0 }}
-    >
-      <svg viewBox="0 0 420 340" className="size-full">
-        <path d="M30 80C30 30 70 0 120 0H300C350 0 390 30 390 80V340H30Z" fill="var(--color-cap-shade)" />
-        <path d="M60 90C60 50 90 30 130 30H290C330 30 360 50 360 90" fill="none" stroke="var(--color-feed-raised)" strokeWidth="6" />
-      </svg>
-    </motion.div>
+    <svg viewBox="0 0 1920 1080" className="absolute inset-0 size-full">
+      <path d="M1180 1200V520C1180 460 1230 420 1290 420H1580C1640 420 1690 460 1690 520V1200Z" fill="var(--color-cap-shade)" />
+      <path d="M1230 540C1230 498 1260 472 1302 472H1568C1610 472 1640 498 1640 540" fill="none" stroke="var(--color-feed-raised)" strokeWidth="10" />
+    </svg>
   );
 }
