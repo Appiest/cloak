@@ -66,8 +66,8 @@ export function WatchRoomForeground({ beat, pull }: LayerProps) {
   return (
     <motion.div className="pointer-events-none absolute inset-0" initial={false} animate={fade} transition={transition} aria-hidden>
       <motion.div className="absolute left-0 top-0 origin-top-left" style={{ width: canvas.w, height: canvas.h, ...camera }}>
-        <Chair />
         <Watcher visible={visible} />
+        <Chair />
       </motion.div>
     </motion.div>
   );
@@ -189,8 +189,8 @@ function Watcher({ visible }: { visible: boolean }) {
 function Chair() {
   return (
     <svg viewBox="0 0 1920 1080" className="absolute inset-0 size-full">
-      <path d="M1180 1200V520C1180 460 1230 420 1290 420H1580C1640 420 1690 460 1690 520V1200Z" fill="var(--color-cap-shade)" />
-      <path d="M1230 540C1230 498 1260 472 1302 472H1568C1610 472 1640 498 1640 540" fill="none" stroke="var(--color-feed-raised)" strokeWidth="10" />
+      <path d="M1190 1300V790C1190 740 1230 710 1280 710H1600C1650 710 1690 740 1690 790V1300Z" fill="var(--color-cap-shade)" />
+      <path d="M1236 806C1236 772 1260 752 1294 752H1586C1620 752 1644 772 1644 806" fill="none" stroke="var(--color-feed-raised)" strokeWidth="10" />
     </svg>
   );
 }
