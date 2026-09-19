@@ -8,6 +8,7 @@ import { Osd } from "../parts/Osd";
 import type { Beat } from "../script";
 
 const frames: Partial<Record<Beat, Rect>> = {
+  title: screenFeed,
   watched: screenFeed,
   everywhere: wallTiles[0],
   who: thumbTiles[0],
@@ -32,7 +33,7 @@ export function MainFeedFill({ beat }: { beat: Beat }) {
 
 export function MainFeedChrome({ beat }: { beat: Beat }) {
   const visible = beat in frames;
-  const showOsd = pick({ watched: 1, everywhere: 1 }, beat, 0);
+  const showOsd = pick({ title: 1, watched: 1, everywhere: 1 }, beat, 0);
   return (
     <motion.div
       className="absolute left-0 top-0"

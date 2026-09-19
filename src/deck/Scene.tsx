@@ -7,6 +7,7 @@ import { FlowDiagram } from "./scenes/FlowDiagram";
 import { Hero } from "./scenes/Hero";
 import { MainFeedChrome, MainFeedFill } from "./scenes/MainFeed";
 import { Question } from "./scenes/Question";
+import { Title } from "./scenes/Title";
 import type { Beat } from "./script";
 
 export function Scene({ beat }: { beat: Beat }) {
@@ -20,6 +21,7 @@ export function Scene({ beat }: { beat: Beat }) {
       <Hero beat={beat} />
       <MainFeedChrome beat={beat} />
       <Question beat={beat} />
+      <Title beat={beat} />
     </>
   );
 }
