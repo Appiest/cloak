@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValueEvent, useTransform, type MotionValue } from "motion/react";
+import { motion, useMotionValue, useMotionValueEvent, useTransform, type MotionValue } from "motion/react";
 import { useId, useRef, type ReactNode } from "react";
 import { bones, joints, type Limb, type Pose } from "./skeleton";
 
@@ -107,4 +107,9 @@ export function Rig({ pose, className }: { pose: MotionValue<Pose>; className?: 
       <rect {...paintArea} fill={`url(#${id}-light)`} mask={`url(#${id}-front)`} />
     </svg>
   );
+}
+
+export function PosedRig({ pose, className }: { pose: Pose; className?: string }) {
+  const value = useMotionValue(pose);
+  return <Rig pose={value} className={className} />;
 }

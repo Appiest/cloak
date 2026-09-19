@@ -35,11 +35,25 @@ export function MainFeedFill({ beat }: { beat: Beat }) {
   const opacity = pick({ everywhere: 1, who: 1, demo: 1, video: 1 }, beat, 0);
   return (
     <motion.div
-      className="absolute left-0 top-0 origin-top-left bg-feed"
+      className="absolute left-0 top-0 origin-top-left overflow-hidden bg-feed"
       initial={false}
       animate={{ ...frameTarget(beat), opacity }}
       transition={moveFor(beat)}
-    />
+    >
+      <Hallway />
+    </motion.div>
+  );
+}
+
+function Hallway() {
+  return (
+    <svg viewBox="0 0 581 464" className="absolute left-0 top-0 h-[464px] w-[581px]" aria-hidden>
+      <rect x="180" y="52" width="220" height="388" fill="var(--color-stage)" />
+      <path d="M172 440V44H408V440" fill="none" stroke="var(--color-feed-raised)" strokeWidth="10" />
+      <rect x="440" y="210" width="16" height="26" fill="var(--color-feed-raised)" />
+      <path d="M70 150h60M84 150v26M116 150v26" stroke="var(--color-feed-raised)" strokeWidth="6" />
+      <path d="M0 440H581" stroke="var(--color-line)" strokeOpacity="0.6" />
+    </svg>
   );
 }
 

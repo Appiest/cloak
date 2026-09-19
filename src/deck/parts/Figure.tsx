@@ -34,14 +34,3 @@ export function Figure({ mirrored = false, synthetic = false, className }: Figur
     </svg>
   );
 }
-
-export function FigureFromAbove({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 200 200" className={className} aria-hidden>
-      <ellipse cx="84" cy="148" rx="11" ry="17" fill="var(--color-figure-shade)" />
-      <ellipse cx="116" cy="148" rx="11" ry="17" fill="var(--color-figure-shade)" />
-      <rect x="24" y="80" width="152" height="48" rx="24" fill="var(--color-figure)" />
-      <circle cx="100" cy="100" r="28" fill="var(--color-figure-shade)" />
-    </svg>
-  );
-}
