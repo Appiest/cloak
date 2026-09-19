@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { screenFeed, thumbTiles, wallTiles, type Rect } from "../geometry";
+import { monitorTiles, screenFeed, wallTiles, type Rect } from "../geometry";
 import { pick, quickFade, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Osd } from "../parts/Osd";
@@ -14,7 +14,7 @@ const frames: Partial<Record<Beat, Rect>> = {
   everywhere: wallTiles[0],
   demo: wallTiles[0],
   video: wallTiles[0],
-  who: thumbTiles[0],
+  who: monitorTiles[0],
 };
 
 function frameTarget(beat: Beat) {

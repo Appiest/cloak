@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
-import { thumbTiles, tileScale, tileSize, wallTiles, type Rect } from "../geometry";
+import { monitorTiles, tileScale, tileSize, wallTiles, type Rect } from "../geometry";
 import { pick, quickFade, sceneEase } from "../motion";
 import { Figure, FigureFromAbove } from "../parts/Figure";
 import { Osd } from "../parts/Osd";
@@ -63,7 +63,7 @@ function FloorGrid() {
 
 const layouts: Partial<Record<Beat, Rect[]>> = {
   everywhere: wallTiles,
-  who: thumbTiles,
+  who: monitorTiles,
   demo: wallTiles,
   video: wallTiles,
 };

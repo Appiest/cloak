@@ -17,17 +17,20 @@ export const wallTiles: Rect[] = Array.from({ length: 6 }, (_, index) => ({
   ...tileSize,
 }));
 
-const thumb = { w: 200, h: 160, gap: 12, x: 120, y: 300 };
+export const monitorScreen: Rect = { x: 520, y: 96, w: 880, h: 495 };
 
-export const thumbTiles: Rect[] = Array.from({ length: 6 }, (_, index) => ({
-  x: thumb.x + (index % 2) * (thumb.w + thumb.gap),
-  y: thumb.y + Math.floor(index / 2) * (thumb.h + thumb.gap),
-  w: thumb.w,
-  h: thumb.h,
-}));
+const monitorScale = monitorScreen.w / canvas.w;
 
-export const thumbStackRight = thumb.x + 2 * thumb.w + thumb.gap;
-export const thumbStackMiddle = thumb.y + (3 * thumb.h + 2 * thumb.gap) / 2;
+function onMonitor(rect: Rect): Rect {
+  return {
+    x: monitorScreen.x + rect.x * monitorScale,
+    y: monitorScreen.y + rect.y * monitorScale,
+    w: rect.w * monitorScale,
+    h: rect.h * monitorScale,
+  };
+}
+
+export const monitorTiles: Rect[] = wallTiles.map(onMonitor);
 
 export type Placement = { x: number; y: number; scale: number };
 

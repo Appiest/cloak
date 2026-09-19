@@ -22,13 +22,15 @@ export const walkHero = {
   unseen: onStreet,
 } satisfies Partial<Record<Beat, Placement>>;
 
-type Leg = { from: number; to: number; seconds: number };
+type Leg = { from: number; to: number };
 
 const legs: Partial<Record<Beat, Leg>> = {
-  alone: { from: 0, to: 560, seconds: 7 },
-  watched: { from: 560, to: 1100, seconds: 7 },
-  unseen: { from: 1100, to: 1640, seconds: 7 },
+  alone: { from: 0, to: 560 },
+  watched: { from: 560, to: 1100 },
+  unseen: { from: 1100, to: 1640 },
 };
+
+const walkingSpeed = 80;
 
 const homeStretch = 1640;
 
@@ -41,8 +43,9 @@ export function useStreetTravel(beat: Beat) {
   useEffect(() => {
     const leg = legs[beat];
     if (!leg) return;
-    if (travel.get() >= leg.to || travel.get() < leg.from - 200) travel.set(leg.from);
-    const controls = animate(travel, leg.to, { duration: leg.seconds, ease: "linear" });
+    if (travel.get() >= leg.to) travel.set(leg.from);
+    const remaining = leg.to - travel.get();
+    const controls = animate(travel, leg.to, { duration: remaining / walkingSpeed, ease: "linear" });
     return () => controls.stop();
   }, [beat, travel]);
   return travel;

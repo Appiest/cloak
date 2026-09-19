@@ -3,7 +3,7 @@
 import { motion, type MotionValue } from "motion/react";
 import { Rig } from "../parts/Rig";
 import { useWalkingPose } from "../parts/useWalkingPose";
-import { figureSize, heroInside, standingAt, thumbTiles, wallTiles, type Placement } from "../geometry";
+import { figureSize, heroInside, standingAt, monitorTiles, wallTiles, type Placement } from "../geometry";
 import { pick, quickFade, sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { countedHero } from "./Counted";
@@ -20,7 +20,7 @@ const center = standingAt(960, 960, 640);
 const placements: Record<Beat, Placement> = {
   ...walkHero,
   everywhere: heroInside(wallTiles[0]),
-  who: heroInside(thumbTiles[0]),
+  who: heroInside(monitorTiles[0]),
   reality: standingAt(960, 930, 230),
   whatNow: standingAt(960, 1000, 420),
   ...countedHero,
