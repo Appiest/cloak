@@ -9,11 +9,14 @@ import { Osd } from "../parts/Osd";
 import { Waveform } from "../parts/Waveform";
 import type { Beat } from "../script";
 
-type View = { camera: string; content: ReactNode };
+export type Glare = { x: number; y: number; r: number };
 
-const views: View[] = [
+type View = { camera: string; content: ReactNode; face?: Glare };
+
+export const views: View[] = [
   {
     camera: "CAM 02",
+    face: { x: 421, y: 239, r: 10 },
     content: (
       <>
         <div className="absolute inset-x-0 top-[372px] h-px bg-line/60" />
@@ -23,6 +26,7 @@ const views: View[] = [
   },
   {
     camera: "CAM 03",
+    face: { x: 290, y: 232, r: 28 },
     content: (
       <>
         <FloorGrid />
@@ -32,10 +36,12 @@ const views: View[] = [
   },
   {
     camera: "CAM 04",
+    face: { x: 219, y: 226, r: 86 },
     content: <Figure className="absolute left-[-50px] top-[70px] h-[1400px]" />,
   },
   {
     camera: "CAM 05",
+    face: { x: 178, y: 173, r: 18 },
     content: <Figure mirrored className="absolute left-[120px] top-[140px] h-[300px] opacity-70" />,
   },
   { camera: "MIC 01", content: <Waveform /> },
@@ -58,12 +64,17 @@ function FloorGrid() {
 const layouts: Partial<Record<Beat, Rect[]>> = {
   everywhere: wallTiles,
   who: thumbTiles,
+  demo: wallTiles,
 };
+
+function staggersIn(beat: Beat) {
+  return beat === "everywhere" || beat === "demo";
+}
 
 export function FeedWall({ beat }: { beat: Beat }) {
   const rects = layouts[beat] ?? wallTiles;
   const visible = beat in layouts;
-  const showOsd = pick({ everywhere: 1 }, beat, 0);
+  const showOsd = pick({ everywhere: 1, demo: 1 }, beat, 0);
   return (
     <>
       {views.map((view, index) => {
@@ -83,7 +94,7 @@ export function FeedWall({ beat }: { beat: Beat }) {
             transition={{
               duration: 1.1,
               ease: sceneEase,
-              delay: beat === "everywhere" ? 0.25 + index * 0.1 : 0,
+              delay: staggersIn(beat) ? 0.25 + index * 0.1 : 0,
             }}
           >
             {view.content}

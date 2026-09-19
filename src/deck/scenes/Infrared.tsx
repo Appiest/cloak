@@ -7,6 +7,7 @@ import { quickFade, sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Cap, capLeds } from "../parts/Cap";
 import { CountUp } from "../parts/CountUp";
+import { FaceCount } from "../parts/FaceCount";
 import { Figure } from "../parts/Figure";
 import { Osd } from "../parts/Osd";
 import { SourceStack, type SourceBlock } from "../parts/SourceStack";
@@ -157,7 +158,7 @@ function CameraView({ visible }: { visible: boolean }) {
       {visible && <SearchingReticle />}
       <div className="absolute inset-0 shadow-[inset_0_0_0_1px_oklch(1_0_0/0.1)]" />
       <Osd camera="CAM 01" />
-      <p className="type-osd absolute bottom-6 left-6 text-mark">Faces found: 0</p>
+      <FaceCount />
     </motion.div>
   );
 }

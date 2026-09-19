@@ -11,6 +11,7 @@ const frames: Partial<Record<Beat, Rect>> = {
   title: screenFeed,
   watched: screenFeed,
   everywhere: wallTiles[0],
+  demo: wallTiles[0],
   who: thumbTiles[0],
 };
 
@@ -20,7 +21,7 @@ function frameTarget(beat: Beat) {
 }
 
 export function MainFeedFill({ beat }: { beat: Beat }) {
-  const opacity = pick({ everywhere: 1, who: 1 }, beat, 0);
+  const opacity = pick({ everywhere: 1, who: 1, demo: 1 }, beat, 0);
   return (
     <motion.div
       className="absolute left-0 top-0 bg-feed"
@@ -33,7 +34,7 @@ export function MainFeedFill({ beat }: { beat: Beat }) {
 
 export function MainFeedChrome({ beat }: { beat: Beat }) {
   const visible = beat in frames;
-  const showOsd = pick({ title: 1, watched: 1, everywhere: 1 }, beat, 0);
+  const showOsd = pick({ title: 1, watched: 1, everywhere: 1, demo: 1 }, beat, 0);
   return (
     <motion.div
       className="absolute left-0 top-0"

@@ -30,12 +30,23 @@ const placements: Record<Beat, Placement> = {
   ...revealHero,
   ...infraredHero,
   ...ultrasonicHero,
+  demo: heroInside(wallTiles[0]),
 };
 
 const hiddenOn: Partial<Record<Beat, boolean>> = { title: true, watchers: true, protections: true };
 
-export function Hero({ beat }: { beat: Beat }) {
+const losingLock = {
+  animate: { opacity: [0, 1, 1, 0], scale: [1.12, 1, 1, 1.12] },
+  transition: { duration: 2.4, times: [0, 0.2, 0.6, 1], delay: 0.6 },
+};
+
+function detection(beat: Beat) {
+  if (beat === "demo") return losingLock;
   const detected = pick({ watched: 1, everywhere: 1, reality: 1 }, beat, 0);
+  return { animate: { opacity: detected, scale: detected ? 1 : 1.12 }, transition: quickFade };
+}
+
+export function Hero({ beat }: { beat: Beat }) {
   const labelled = pick({ watched: 1 }, beat, 0);
   return (
     <motion.div
@@ -51,8 +62,7 @@ export function Hero({ beat }: { beat: Beat }) {
       <motion.div
         className="absolute -inset-x-10 -inset-y-8"
         initial={false}
-        animate={{ opacity: detected, scale: detected ? 1 : 1.12 }}
-        transition={quickFade}
+        {...detection(beat)}
       >
         <Brackets arm={56} weight={4} />
         <motion.span

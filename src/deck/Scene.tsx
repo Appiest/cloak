@@ -2,6 +2,7 @@
 
 import { BackdropWord } from "./scenes/BackdropWord";
 import { Counted } from "./scenes/Counted";
+import { Demo } from "./scenes/Demo";
 import { Crowd } from "./scenes/Crowd";
 import { FeedWall } from "./scenes/FeedWall";
 import { FlowDiagram } from "./scenes/FlowDiagram";
@@ -35,6 +36,7 @@ export function Scene({ beat }: { beat: Beat }) {
       <InfraredLight beat={beat} />
       <SoundRings beat={beat} half="front" />
       <MainFeedChrome beat={beat} />
+      <Demo beat={beat} />
       <Question beat={beat} />
       <Reveal beat={beat} />
       <Title beat={beat} />
