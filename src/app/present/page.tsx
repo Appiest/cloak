@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Deck } from "@/deck/Deck";
+import { parseLook } from "@/deck/look";
 import { outline } from "@/deck/script";
 import { parsePosition } from "@/deck/timeline";
 
@@ -12,5 +13,5 @@ function first(value: string | string[] | undefined) {
 export default async function PresentPage({ searchParams }: PageProps<"/present">) {
   const params = await searchParams;
   const initial = parsePosition(first(params.slide), first(params.beat), outline);
-  return <Deck initial={initial} />;
+  return <Deck initial={initial} look={parseLook(first(params.style))} />;
 }

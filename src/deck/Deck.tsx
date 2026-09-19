@@ -2,13 +2,16 @@
 
 import { MotionConfig } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
+import { withLook, type Look } from "./look";
 import { Scene } from "./Scene";
 import { outline, slides } from "./script";
 import { Stage } from "./Stage";
 import { advance, last, retreat, start, toSearch, type Position } from "./timeline";
 import { useDeckControls } from "./useDeckControls";
 
-export function Deck({ initial }: { initial: Position }) {
+type DeckProps = { initial: Position; look: Look };
+
+export function Deck({ initial, look }: DeckProps) {
   const [position, setPosition] = useState(initial);
 
   const commands = useMemo(
@@ -23,8 +26,8 @@ export function Deck({ initial }: { initial: Position }) {
   useDeckControls(commands);
 
   useEffect(() => {
-    window.history.replaceState(null, "", `${window.location.pathname}${toSearch(position)}`);
-  }, [position]);
+    window.history.replaceState(null, "", `${window.location.pathname}${withLook(toSearch(position), look)}`);
+  }, [position, look]);
 
   const beat = slides[position.slide].beats[position.beat];
 
@@ -35,7 +38,7 @@ export function Deck({ initial }: { initial: Position }) {
         <p className="sr-only" aria-live="polite">
           {`Slide ${position.slide + 1} of ${slides.length}, beat ${position.beat + 1}`}
         </p>
-        <Stage>
+        <Stage look={look}>
           <Scene beat={beat} />
         </Stage>
       </main>

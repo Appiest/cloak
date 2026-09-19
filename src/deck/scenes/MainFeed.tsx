@@ -22,7 +22,7 @@ export function MainFeedFill({ beat }: { beat: Beat }) {
   const opacity = pick({ everywhere: 1, who: 1 }, beat, 0);
   return (
     <motion.div
-      className="absolute left-0 top-0 bg-feed"
+      className="absolute left-0 top-0 rounded-tile bg-feed shadow-tile"
       initial={false}
       animate={{ ...frameTarget(beat), opacity }}
       transition={sceneMove}
@@ -40,7 +40,11 @@ export function MainFeedChrome({ beat }: { beat: Beat }) {
       animate={{ ...frameTarget(beat), opacity: visible ? 1 : 0 }}
       transition={sceneMove}
     >
-      <Brackets arm={beat === "who" ? 22 : 44} weight={beat === "who" ? 2 : 3} />
+      <Brackets
+        arm={beat === "who" ? 22 : 44}
+        weight={beat === "who" ? 2 : 3}
+        inset={beat === "who" ? "0px" : "var(--frame-inset)"}
+      />
       <motion.div initial={false} animate={{ opacity: showOsd }} transition={quickFade}>
         <Osd camera="CAM 01" />
       </motion.div>

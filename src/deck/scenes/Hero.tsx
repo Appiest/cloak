@@ -39,7 +39,7 @@ export function Hero({ beat }: { beat: Beat }) {
       >
         <Brackets arm={56} weight={4} />
         <motion.span
-          className="type-osd absolute -top-12 left-0 text-[28px] text-ir"
+          className="type-osd absolute -top-12 left-0 text-[28px] text-mark"
           initial={false}
           animate={{ opacity: labelled }}
           transition={quickFade}
@@ -56,7 +56,7 @@ function Pool({ beat }: { beat: Beat }) {
   return (
     <motion.div
       className="absolute -bottom-16 left-1/2 h-32 w-[520px] -translate-x-1/2 rounded-[50%]"
-      style={{ background: "radial-gradient(closest-side, oklch(1 0 0 / 0.1), transparent)" }}
+      style={{ background: "radial-gradient(closest-side, var(--color-pool), transparent)" }}
       initial={false}
       animate={{ opacity }}
       transition={sceneMove}

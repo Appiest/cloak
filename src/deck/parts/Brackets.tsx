@@ -1,4 +1,4 @@
-type BracketsProps = { arm?: number; weight?: number };
+type BracketsProps = { arm?: number; weight?: number; inset?: string };
 
 const corners = [
   "left-0 top-0 border-l border-t",
@@ -7,13 +7,13 @@ const corners = [
   "right-0 bottom-0 border-r border-b",
 ];
 
-export function Brackets({ arm = 44, weight = 3 }: BracketsProps) {
+export function Brackets({ arm = 44, weight = 3, inset = "0px" }: BracketsProps) {
   return (
-    <div className="pointer-events-none absolute inset-0" aria-hidden>
+    <div className="pointer-events-none absolute" style={{ inset }} aria-hidden>
       {corners.map((corner) => (
         <span
           key={corner}
-          className={`absolute border-ir ${corner}`}
+          className={`absolute border-mark ${corner}`}
           style={{ width: arm, height: arm, borderWidth: 0, ...cornerWidths(corner, weight) }}
         />
       ))}

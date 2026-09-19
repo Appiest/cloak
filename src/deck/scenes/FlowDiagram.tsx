@@ -53,7 +53,7 @@ export function FlowDiagram({ beat }: { beat: Beat }) {
       {destinations.map((destination, index) => (
         <motion.div
           key={destination.question}
-          className="absolute flex flex-col justify-between border border-line bg-feed p-8"
+          className="absolute flex flex-col justify-between rounded-tile border border-node-edge bg-feed p-8 shadow-tile"
           style={{ left: nodeX, top: destination.y, width: nodeW, height: nodeH }}
           initial={false}
           animate={{ opacity: visible ? 1 : 0, x: visible ? 0 : 40 }}
@@ -64,7 +64,7 @@ export function FlowDiagram({ beat }: { beat: Beat }) {
             {destination.bars.map((width, bar) => (
               <motion.span
                 key={bar}
-                className="h-7 origin-left bg-redacted shadow-[inset_0_0_0_1px_oklch(1_0_0/0.08)]"
+                className="h-7 origin-left bg-redacted"
                 style={{ width: `${width * 30}%` }}
                 initial={false}
                 animate={{ scaleX: visible ? 1 : 0 }}

@@ -71,7 +71,7 @@ export function FeedWall({ beat }: { beat: Beat }) {
         return (
           <motion.div
             key={view.camera}
-            className="absolute left-0 top-0 origin-top-left overflow-hidden bg-feed"
+            className="absolute left-0 top-0 origin-top-left overflow-hidden rounded-tile bg-feed shadow-tile"
             style={{ width: tileSize.w, height: tileSize.h }}
             initial={false}
             animate={{
@@ -87,7 +87,6 @@ export function FeedWall({ beat }: { beat: Beat }) {
             }}
           >
             {view.content}
-            <div className="absolute inset-0 shadow-[inset_0_0_0_1px_oklch(1_0_0/0.1)]" />
             <motion.div initial={false} animate={{ opacity: showOsd }} transition={quickFade}>
               <Osd camera={view.camera} recording={false} />
             </motion.div>

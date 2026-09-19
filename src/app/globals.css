@@ -11,8 +11,20 @@
   --color-figure: oklch(0.6 0 0);
   --color-figure-shade: oklch(0.34 0 0);
   --color-redacted: oklch(0.07 0 0);
-  --color-ir: oklch(0.64 0.24 27);
-  --color-ir-glow: oklch(0.64 0.24 27 / 0.55);
+  --color-mark: oklch(0.64 0.24 27);
+  --color-mark-glow: oklch(0.64 0.24 27 / 0.55);
+  --color-node-edge: oklch(0.46 0 0);
+  --color-pool: oklch(1 0 0 / 0.1);
+
+  --radius-tile: 0px;
+  --frame-inset: 0px;
+  --osd-inset: 24px;
+  --shadow-tile: inset 0 0 0 1px oklch(1 0 0 / 0.1);
+
+  --text-backdrop: 400px;
+  --text-question: 176px;
+  --display-stretch: 62%;
+  --display-weight: 800;
 
   --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -22,10 +34,36 @@
 
 @utility type-display {
   font-family: var(--font-sans);
-  font-stretch: 62%;
-  font-weight: 800;
+  font-stretch: var(--display-stretch);
+  font-weight: var(--display-weight);
   line-height: 0.9;
   text-wrap: balance;
+}
+
+[data-look="clean"] {
+  --color-stage: oklch(0.955 0.004 80);
+  --color-feed: oklch(0.995 0.002 80);
+  --color-ink: oklch(0.2 0.006 80);
+  --color-ink-muted: oklch(0.46 0.006 80);
+  --color-ink-faint: oklch(0.9 0.005 80);
+  --color-line: oklch(0.78 0.006 80);
+  --color-figure: oklch(0.44 0.006 80);
+  --color-figure-shade: oklch(0.26 0.006 80);
+  --color-redacted: oklch(0.91 0.004 80);
+  --color-mark: oklch(0.5 0.09 200);
+  --color-mark-glow: oklch(0.5 0.09 200 / 0);
+  --color-node-edge: transparent;
+  --color-pool: oklch(0.2 0.006 80 / 0.16);
+
+  --radius-tile: 20px;
+  --frame-inset: 14px;
+  --osd-inset: 40px;
+  --shadow-tile: 0 1px 2px oklch(0.2 0.006 80 / 0.08), 0 16px 40px oklch(0.2 0.006 80 / 0.1);
+
+  --text-backdrop: 290px;
+  --text-question: 136px;
+  --display-stretch: 100%;
+  --display-weight: 700;
 }
 
 @utility type-label {

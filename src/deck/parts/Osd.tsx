@@ -7,12 +7,15 @@ type OsdProps = { camera: string; recording?: boolean };
 export function Osd({ camera, recording = true }: OsdProps) {
   const time = useClock();
   return (
-    <div className="type-osd pointer-events-none absolute inset-x-6 top-6 flex items-center justify-between text-ink-muted">
+    <div
+      className="type-osd pointer-events-none absolute flex items-center justify-between text-ink-muted"
+      style={{ left: "var(--osd-inset)", right: "var(--osd-inset)", top: "var(--osd-inset)" }}
+    >
       <span className="flex items-center gap-3">
         {recording && (
           <span
-            className="animate-rec size-3.5 rounded-full bg-ir"
-            style={{ boxShadow: "0 0 18px 4px var(--color-ir-glow)" }}
+            className="animate-rec size-3.5 rounded-full bg-mark"
+            style={{ boxShadow: "0 0 18px 4px var(--color-mark-glow)" }}
           />
         )}
         {camera}
