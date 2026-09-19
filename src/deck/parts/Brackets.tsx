@@ -13,7 +13,7 @@ export function Brackets({ arm = 44, weight = 3 }: BracketsProps) {
       {corners.map((corner) => (
         <span
           key={corner}
-          className={`absolute border-ir ${corner}`}
+          className={`absolute border-mark ${corner}`}
           style={{ width: arm, height: arm, borderWidth: 0, ...cornerWidths(corner, weight) }}
         />
       ))}

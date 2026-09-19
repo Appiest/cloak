@@ -11,8 +11,8 @@ export function Osd({ camera, recording = true }: OsdProps) {
       <span className="flex items-center gap-3">
         {recording && (
           <span
-            className="animate-rec size-3.5 rounded-full bg-ir"
-            style={{ boxShadow: "0 0 18px 4px var(--color-ir-glow)" }}
+            className="animate-rec size-3.5 rounded-full bg-mark"
+            style={{ boxShadow: "0 0 18px 4px var(--color-mark-glow)" }}
           />
         )}
         {camera}

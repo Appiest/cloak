@@ -1,6 +1,7 @@
 "use client";
 
 import { BackdropWord } from "./scenes/BackdropWord";
+import { Counted } from "./scenes/Counted";
 import { Crowd } from "./scenes/Crowd";
 import { FeedWall } from "./scenes/FeedWall";
 import { FlowDiagram } from "./scenes/FlowDiagram";
@@ -18,6 +19,7 @@ export function Scene({ beat }: { beat: Beat }) {
       <MainFeedFill beat={beat} />
       <FeedWall beat={beat} />
       <FlowDiagram beat={beat} />
+      <Counted beat={beat} />
       <Hero beat={beat} />
       <MainFeedChrome beat={beat} />
       <Question beat={beat} />

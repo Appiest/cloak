@@ -11,8 +11,8 @@
   --color-figure: oklch(0.6 0 0);
   --color-figure-shade: oklch(0.34 0 0);
   --color-redacted: oklch(0.07 0 0);
-  --color-ir: oklch(0.64 0.24 27);
-  --color-ir-glow: oklch(0.64 0.24 27 / 0.55);
+  --color-mark: oklch(0.64 0.24 27);
+  --color-mark-glow: oklch(0.64 0.24 27 / 0.55);
 
   --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;

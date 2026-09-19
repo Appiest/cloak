@@ -5,6 +5,7 @@ import { figureSize, heroInside, standingAt, thumbTiles, wallTiles, type Placeme
 import { pick, quickFade, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Figure } from "../parts/Figure";
+import { countedHero } from "./Counted";
 import type { Beat } from "../script";
 
 const center = standingAt(960, 960, 640);
@@ -17,6 +18,7 @@ const placements: Record<Beat, Placement> = {
   who: heroInside(thumbTiles[0]),
   reality: standingAt(960, 930, 230),
   whatNow: standingAt(960, 1000, 420),
+  ...countedHero,
 };
 
 export function Hero({ beat }: { beat: Beat }) {
@@ -40,7 +42,7 @@ export function Hero({ beat }: { beat: Beat }) {
       >
         <Brackets arm={56} weight={4} />
         <motion.span
-          className="type-osd absolute -top-12 left-0 text-[28px] text-ir"
+          className="type-osd absolute -top-12 left-0 text-[28px] text-mark"
           initial={false}
           animate={{ opacity: labelled }}
           transition={quickFade}
