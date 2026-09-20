@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import { figureSize, pointOnFigure, standingAt, type Placement } from "../geometry";
-import { pick, quickFade, sceneEase, sceneMove } from "../motion";
+import { quickFade, sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Figure } from "../parts/Figure";
 import type { Beat } from "../script";
@@ -11,13 +11,15 @@ export type ManipulatedVariant = "faces" | "strings";
 
 export const variant: ManipulatedVariant = "faces";
 
-const you = standingAt(620, 880, 470);
-const stolen = standingAt(1320, 880, 470);
+// You are nearest the camera and largest; the people around you sit behind and
+// smaller, so "closest to you" reads as proximity rather than a lineup.
+const you = standingAt(560, 980, 560);
+const stolen = standingAt(1400, 930, 500);
 
 const closest: Placement[] = [
-  standingAt(240, 905, 430),
-  standingAt(1000, 915, 450),
-  standingAt(1700, 900, 435),
+  standingAt(250, 880, 360),
+  standingAt(830, 900, 395),
+  standingAt(1060, 860, 330),
 ];
 
 export const manipulatedHero = {
@@ -25,9 +27,6 @@ export const manipulatedHero = {
   frame: you,
   exploit: you,
 } satisfies Partial<Record<Beat, Placement>>;
-
-export const splitBar = { x: 100, y: 700, w: 1720, h: 56 };
-export const timelineAxisY = 560;
 
 const yourHead = pointOnFigure(you, 100, 58);
 const stolenHead = pointOnFigure(stolen, 100, 58);
@@ -206,19 +205,6 @@ function Thread({ target, shown, delay }: { target: { x: number; y: number }; sh
       initial={false}
       animate={{ pathLength: shown ? 1 : 0, opacity: shown ? 0.8 : 0 }}
       transition={{ duration: 0.7, ease: sceneEase, delay: shown ? delay : 0 }}
-    />
-  );
-}
-
-export function SplitBar({ beat }: { beat: Beat }) {
-  const opacity = pick({ watchers: 1, protections: 1 }, beat, 0);
-  return (
-    <motion.div
-      className="absolute left-0 top-0 bg-line"
-      initial={false}
-      animate={{ opacity, x: splitBar.x, y: timelineAxisY, width: splitBar.w, height: 4 }}
-      transition={sceneMove}
-      aria-hidden
     />
   );
 }

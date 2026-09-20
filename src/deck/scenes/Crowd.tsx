@@ -42,10 +42,20 @@ const people = rows.flatMap((row, rowIndex) => {
 const pullBackFrom = 2.6;
 const pullBackSeconds = 2.8;
 
+// The caps light as a wave travelling out from the hero, so the room turns
+// over in one move instead of everyone popping at random.
+const waveOrigin = { x: 960, y: 960 };
+const waveSpeed = 1500;
+
+function waveDelay(centerX: number, feetY: number): number {
+  return Math.hypot(centerX - waveOrigin.x, feetY - waveOrigin.y) / waveSpeed;
+}
+
 export function Crowd({ beat }: { beat: Beat }) {
   const presence = pick({ reality: 1, whatNow: 0.14, flock: 1, together: 1 }, beat, 0);
   const watched = beat === "reality" || beat === "flock";
   const capped = beat === "together";
+  const released = capped;
   const amongThem = beat === "who";
   return (
     <motion.div
@@ -75,15 +85,23 @@ export function Crowd({ beat }: { beat: Beat }) {
               className="absolute inset-0"
               initial={false}
               animate={{ opacity: capped ? 1 : 0, y: capped ? 0 : -60 }}
-              transition={{ duration: 0.6, ease: sceneEase, delay: capped ? 0.4 + jitter(order + 3) * 1.6 : 0 }}
+              transition={{
+                duration: 0.45,
+                ease: sceneEase,
+                delay: capped ? 0.35 + waveDelay(person.centerX, person.feetY) : 0,
+              }}
             >
               <Cap className="size-full" glowing={capped} />
             </motion.div>
             <motion.div
               className="absolute -inset-x-10 -inset-y-8"
               initial={false}
-              animate={{ opacity: watched ? 1 : 0, scale: watched ? 1 : 1.15 }}
-              transition={{ duration: 0.4, ease: sceneEase, delay: watched ? 1.4 + jitter(order) * 1.5 : 0 }}
+              animate={{ opacity: watched ? 1 : 0, scale: watched ? 1 : released ? 1.6 : 1.15 }}
+              transition={{
+                duration: released ? 0.5 : 0.4,
+                ease: sceneEase,
+                delay: bracketDelay(watched, released, order, person),
+              }}
             >
               <Brackets arm={70} weight={10} />
             </motion.div>
@@ -92,4 +110,10 @@ export function Crowd({ beat }: { beat: Beat }) {
       })}
     </motion.div>
   );
+}
+
+function bracketDelay(watched: boolean, released: boolean, order: number, person: { centerX: number; feetY: number }) {
+  if (watched) return 1.4 + jitter(order) * 1.5;
+  if (released) return 0.3 + waveDelay(person.centerX, person.feetY);
+  return 0;
 }

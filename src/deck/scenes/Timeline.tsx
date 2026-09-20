@@ -2,173 +2,154 @@
 
 import { motion } from "motion/react";
 import { quickFade, sceneEase } from "../motion";
+import { SourceStack, type SourceBlock } from "../parts/SourceStack";
 import type { Beat } from "../script";
-import { sources, type Source } from "../sources";
-import { splitBar, timelineAxisY } from "./Manipulated";
+import { sources } from "../sources";
 
-type Side = "watchers" | "protections";
-
-type Milestone = {
-  side: Side;
-  year: number;
-  date: string;
-  text: string;
-  source: Source;
-  cardX: number;
-};
+const plot = { left: 100, right: 1820, baseline: 880, top: 200 };
+const plotWidth = plot.right - plot.left;
+const plotHeight = plot.baseline - plot.top;
 
 const firstYear = 2011;
 const lastYear = 2027;
-const cardWidth = 400;
+const tickYears = [2011, 2015, 2020, 2025];
 
-const milestones: Milestone[] = [
-  {
-    side: "watchers",
-    year: 2011.2,
-    date: "March 2011",
-    text: "UK police estimate the country has about 1.85 million CCTV cameras",
-    source: sources.ukCctvEstimate,
-    cardX: 100,
-  },
-  {
-    side: "watchers",
-    year: 2023.2,
-    date: "March 2023",
-    text: "The FTC warns that scammers are cloning voices with AI",
-    source: sources.ftcVoiceCloning,
-    cardX: 540,
-  },
-  {
-    side: "watchers",
-    year: 2024.9,
-    date: "December 2024",
-    text: "The FBI warns criminals use AI-generated audio and video",
-    source: sources.fbiGenerativeFraud,
-    cardX: 980,
-  },
-  {
-    side: "watchers",
-    year: 2026.6,
-    date: "July 2026",
-    text: "Flock Safety says more than 5,000 law enforcement agencies use it",
-    source: sources.flockAgencies,
-    cardX: 1420,
-  },
-  {
-    side: "protections",
-    year: 2020.5,
-    date: "July 2020",
-    text: "The GAO finds no comprehensive federal privacy law covers what companies collect",
-    source: sources.gaoPrivacyLaw,
-    cardX: 640,
-  },
-  {
-    side: "protections",
-    year: 2024.2,
-    date: "March 2024",
-    text: "Airbnb bans cameras inside listings. It’s a company rule, not a law.",
-    source: sources.airbnbCameraBan,
-    cardX: 1120,
-  },
-];
-
-const tickYears = [2015, 2020, 2025];
-
-function yearToX(year: number): number {
-  return splitBar.x + ((year - firstYear) / (lastYear - firstYear)) * splitBar.w;
-}
-
-const sidesShown: Partial<Record<Beat, Side[]>> = {
-  watchers: ["watchers"],
-  protections: ["watchers", "protections"],
+const beatSources: Partial<Record<Beat, SourceBlock>> = {
+  protections: { list: [sources.gaoPrivacyLaw, sources.airbnbCameraBan], left: plot.left, width: 900 },
 };
 
+function yearToX(year: number): number {
+  return plot.left + ((year - firstYear) / (lastYear - firstYear)) * plotWidth;
+}
+
+// Capability compounds; protection barely moves. The distance between them is the point.
+function capabilityAt(progress: number): number {
+  return progress ** 2.6;
+}
+
+function protectionAt(progress: number): number {
+  return progress * 0.11;
+}
+
+const samples = Array.from({ length: 49 }, (_, index) => index / 48);
+
+function curve(height: (progress: number) => number): string {
+  return samples
+    .map((progress, index) => {
+      const x = Math.round(plot.left + progress * plotWidth);
+      const y = Math.round(plot.baseline - height(progress) * plotHeight);
+      return `${index === 0 ? "M" : "L"}${x} ${y}`;
+    })
+    .join(" ");
+}
+
+const capabilityPath = curve(capabilityAt);
+const protectionPath = curve(protectionAt);
+
+const gapArea = `${capabilityPath} L${plot.right} ${Math.round(plot.baseline - protectionAt(1) * plotHeight)} ${[...samples]
+  .reverse()
+  .map((progress) => `L${Math.round(plot.left + progress * plotWidth)} ${Math.round(plot.baseline - protectionAt(progress) * plotHeight)}`)
+  .join(" ")} Z`;
+
+const endOf = (height: (progress: number) => number) => ({
+  x: plot.right,
+  y: Math.round(plot.baseline - height(1) * plotHeight),
+});
+
 export function Timeline({ beat }: { beat: Beat }) {
-  const shown = sidesShown[beat] ?? [];
-  const onTimeline = shown.length > 0;
+  const rising = beat === "watchers" || beat === "protections";
+  const showingGap = beat === "protections";
   return (
     <div className="pointer-events-none absolute inset-0">
-      <motion.div initial={false} animate={{ opacity: onTimeline ? 1 : 0 }} transition={quickFade}>
-        <SideLabel y={timelineAxisY - 60}>Watching you</SideLabel>
-        <SideLabel y={timelineAxisY + 56} visible={shown.includes("protections")}>
-          Protecting you
-        </SideLabel>
-        {tickYears.map((year) => (
-          <span
-            key={year}
-            className="type-osd absolute text-[18px] text-ink-muted"
-            style={{ left: yearToX(year) - 22, top: timelineAxisY + 18 }}
-          >
-            {year}
-          </span>
-        ))}
+      <motion.div initial={false} animate={{ opacity: rising ? 1 : 0 }} transition={quickFade}>
+        <Axis />
+        <Plot rising={rising} showingGap={showingGap} />
+        <CurveLabel at={endOf(capabilityAt)} visible={rising} delay={1.5} className="text-mark">
+          What can watch you
+        </CurveLabel>
+        <CurveLabel at={endOf(protectionAt)} visible={showingGap} delay={1.2} className="text-ink-muted">
+          What protects you
+        </CurveLabel>
       </motion.div>
-      {milestones.map((milestone, order) => (
-        <MilestoneMark key={milestone.date} milestone={milestone} visible={shown.includes(milestone.side)} order={order} />
-      ))}
+      <SourceStack beat={beat} blocks={beatSources} />
     </div>
   );
 }
 
-function SideLabel({ y, visible = true, children }: { y: number; visible?: boolean; children: string }) {
+function Axis() {
   return (
-    <motion.span
-      className="type-label absolute left-[220px] text-[30px] text-ink-muted"
-      style={{ top: y }}
-      initial={false}
-      animate={{ opacity: visible ? 1 : 0 }}
-      transition={quickFade}
-    >
-      {children}
-    </motion.span>
+    <>
+      <div className="absolute h-px bg-line/50" style={{ left: plot.left, width: plotWidth, top: plot.baseline }} />
+      {tickYears.map((year) => (
+        <span
+          key={year}
+          className="type-osd absolute text-[20px] text-ink-faint"
+          style={{ left: yearToX(year) - 24, top: plot.baseline + 22 }}
+        >
+          {year}
+        </span>
+      ))}
+    </>
   );
 }
 
-const rows: Record<Side, { cardTop: number; anchorY: number; dot: string; enterY: number }> = {
-  watchers: { cardTop: 150, anchorY: 400, dot: "bg-mark", enterY: 12 },
-  protections: { cardTop: 720, anchorY: 708, dot: "bg-ink", enterY: -12 },
+function Plot({ rising, showingGap }: { rising: boolean; showingGap: boolean }) {
+  return (
+    <svg className="absolute inset-0 size-full" viewBox="0 0 1920 1080" aria-hidden>
+      <defs>
+        <pattern id="lag-hatch" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(135)">
+          <line x1="0" y1="0" x2="0" y2="16" stroke="var(--color-mark)" strokeWidth="2" opacity="0.28" />
+        </pattern>
+      </defs>
+      <motion.path
+        d={gapArea}
+        fill="url(#lag-hatch)"
+        initial={false}
+        animate={{ opacity: showingGap ? 1 : 0 }}
+        transition={{ duration: 0.8, ease: sceneEase, delay: showingGap ? 0.5 : 0 }}
+      />
+      <motion.path
+        d={protectionPath}
+        stroke="var(--color-ink-muted)"
+        strokeWidth="4"
+        fill="none"
+        initial={false}
+        animate={{ pathLength: showingGap ? 1 : 0 }}
+        transition={{ duration: 1.1, ease: sceneEase }}
+      />
+      <motion.path
+        d={capabilityPath}
+        stroke="var(--color-mark)"
+        strokeWidth="6"
+        fill="none"
+        strokeLinecap="round"
+        style={{ filter: "drop-shadow(0 0 16px var(--color-mark-glow))" }}
+        initial={false}
+        animate={{ pathLength: rising ? 1 : 0 }}
+        transition={{ duration: 1.8, ease: sceneEase, delay: rising ? 0.3 : 0 }}
+      />
+    </svg>
+  );
+}
+
+type CurveLabelProps = {
+  at: { x: number; y: number };
+  visible: boolean;
+  delay: number;
+  className: string;
+  children: string;
 };
 
-type MilestoneMarkProps = { milestone: Milestone; visible: boolean; order: number };
-
-function MilestoneMark({ milestone, visible, order }: MilestoneMarkProps) {
-  const pointX = yearToX(milestone.year);
-  const row = rows[milestone.side];
-  const anchorX = milestone.cardX + 40;
-  const delay = visible ? 0.4 + (order % 4) * 0.35 : 0;
+function CurveLabel({ at, visible, delay, className, children }: CurveLabelProps) {
   return (
-    <>
-      <svg className="absolute inset-0 size-full" viewBox="0 0 1920 1080" aria-hidden>
-        <motion.path
-          d={`M${pointX} ${timelineAxisY} L${anchorX} ${row.anchorY}`}
-          stroke="var(--color-line)"
-          strokeWidth={1.5}
-          fill="none"
-          initial={false}
-          animate={{ pathLength: visible ? 1 : 0 }}
-          transition={{ duration: 0.5, ease: sceneEase, delay }}
-        />
-      </svg>
-      <motion.span
-        className={`absolute size-4 -translate-x-1/2 -translate-y-1/2 rounded-full ${row.dot}`}
-        style={{ left: pointX, top: timelineAxisY + 2 }}
-        initial={false}
-        animate={{ scale: visible ? 1 : 0 }}
-        transition={{ duration: 0.4, ease: sceneEase, delay }}
-      />
-      <motion.div
-        className="absolute flex flex-col gap-2"
-        style={{ left: milestone.cardX, top: row.cardTop, width: cardWidth }}
-        initial={false}
-        animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : row.enterY }}
-        transition={{ ...quickFade, delay: visible ? delay + 0.2 : 0 }}
-      >
-        <p className="type-label text-[22px] text-ink-muted">{milestone.date}</p>
-        <p className="type-label text-[28px] leading-tight text-ink" style={{ textWrap: "pretty" }}>
-          {milestone.text}
-        </p>
-        <p className="type-source text-[15px] text-ink-muted">{milestone.source.citation}</p>
-      </motion.div>
-    </>
+    <motion.span
+      className={`type-label absolute text-[34px] ${className}`}
+      style={{ left: at.x - 420, top: at.y - 56, width: 400, textAlign: "right" }}
+      initial={false}
+      animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 10 }}
+      transition={{ ...quickFade, delay: visible ? delay : 0 }}
+    >
+      {children}
+    </motion.span>
   );
 }

@@ -94,8 +94,17 @@ export function useFrontDoor(beat: Beat, travel: MotionValue<number>) {
   const presence = useMotionValue(1);
   const doorOpen = useMotionValue(0);
   useEffect(() => {
+    if (beat === "who") {
+      // The camera keeps dollying for 5.5s here, so the figure and the door
+      // have to finish on a curve too. Snapping them reads as a separate,
+      // much faster move and breaks the single-shot illusion.
+      const settling = { duration: 0.7, ease: sceneEase };
+      const leaving = animate(presence, 0, settling);
+      const shutting = animate(doorOpen, 0, settling);
+      return () => [leaving, shutting].forEach((controls) => controls.stop());
+    }
     if (beat !== "everywhere") {
-      presence.set(beat === "who" ? 0 : 1);
+      presence.set(1);
       doorOpen.set(0);
       return;
     }

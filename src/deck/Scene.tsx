@@ -9,7 +9,7 @@ import { Crowd } from "./scenes/Crowd";
 import { FeedWall } from "./scenes/FeedWall";
 import { Hero } from "./scenes/Hero";
 import { Infrared, InfraredLight } from "./scenes/Infrared";
-import { Manipulated, SplitBar } from "./scenes/Manipulated";
+import { Manipulated } from "./scenes/Manipulated";
 import { Timeline } from "./scenes/Timeline";
 import { MainFeedChrome, MainFeedFill } from "./scenes/MainFeed";
 import { Question } from "./scenes/Question";
@@ -33,7 +33,6 @@ export function Scene({ beat }: { beat: Beat }) {
       <MainFeedFill beat={beat} />
       <FeedWall beat={beat} />
       <Counted beat={beat} />
-      <SplitBar beat={beat} />
       <Timeline beat={beat} />
       <Manipulated beat={beat} />
       <Infrared beat={beat} />

@@ -45,7 +45,8 @@ function connect(wsUrl) {
     const p = pending.get(m.id);
     if (!p) return;
     pending.delete(m.id);
-    m.error ? p.reject(new Error(m.error.message)) : p.resolve(m.result);
+    if (m.error) p.reject(new Error(m.error.message));
+    else p.resolve(m.result);
   });
   return {
     ready,
