@@ -16,6 +16,7 @@ import { Cap } from "../parts/Cap";
 import { isAtOrAfter, type Beat } from "../script";
 
 const center = standingAt(960, 960, 640);
+const lawHero = standingAt(300, 676, 220);
 
 const placements: Record<Beat, Placement> = {
   ...walkHero,
@@ -25,8 +26,8 @@ const placements: Record<Beat, Placement> = {
   whatNow: standingAt(960, 1000, 420),
   ...countedHero,
   ...manipulatedHero,
-  watchers: manipulatedHero.undetected,
-  protections: manipulatedHero.undetected,
+  watchers: lawHero,
+  protections: lawHero,
   ...revealHero,
   ...infraredHero,
   ...ultrasonicHero,
@@ -36,6 +37,7 @@ const placements: Record<Beat, Placement> = {
   humanFirst: center,
   flock: standingAt(960, 930, 230),
   together: standingAt(960, 930, 230),
+  thanks: standingAt(960, 930, 230),
 };
 
 const hiddenOn: Partial<Record<Beat, boolean>> = { title: true, who: true, watchers: true, protections: true, takeHome: true };

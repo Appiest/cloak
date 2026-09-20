@@ -15,7 +15,6 @@ type Side = "left" | "right";
 
 type Callout = {
   title: string;
-  body: string;
   side: Side;
   box: { x: number; y: number };
   target: { x: number; y: number };
@@ -25,14 +24,12 @@ const callouts: Callout[] = [
   {
     title: "Infrared LEDs in the brim",
     side: "left",
-    body: "They shine near-infrared light, which people can’t see, onto your face.",
     box: { x: 100, y: 420 },
     target: capAnchors.led,
   },
   {
     title: "Ultrasonic transducers in the band",
     side: "right",
-    body: "They play ultrasound that microphones pick up as noise.",
     box: { x: 1340, y: 260 },
     target: capAnchors.transducer,
   },
@@ -107,12 +104,6 @@ function CalloutMark({ callout, visible, order }: { callout: Callout; visible: b
         <h3 className="type-label text-[40px] text-ink" style={{ textAlign }}>
           {callout.title}
         </h3>
-        <p
-          className="type-label mt-3 text-[30px] font-normal text-ink-muted"
-          style={{ textAlign, textWrap: "pretty" }}
-        >
-          {callout.body}
-        </p>
       </motion.div>
     </>
   );

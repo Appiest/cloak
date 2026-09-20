@@ -8,8 +8,8 @@ import { Noise } from "../parts/Noise";
 import type { Beat } from "../script";
 import { views, type Glare } from "./FeedWall";
 
-const firstWhiteout = 1.6;
-const whiteoutStep = 0.5;
+const firstWhiteout = 0.35;
+const whiteoutStep = 0.12;
 const maxGlare = 320;
 
 function heroGlare(): Glare {
@@ -48,13 +48,13 @@ function Whiteout({ tile, face, playing, delay }: WhiteoutProps) {
       style={{ left: tile.x, top: tile.y, width: tile.w, height: tile.h }}
       initial={false}
       animate={{ opacity: playing ? 1 : 0 }}
-      transition={playing ? { duration: 0.35, ease: sceneEase, delay } : quickFade}
+      transition={playing ? { duration: 0.16, ease: sceneEase, delay } : quickFade}
     >
       <motion.div
         className="absolute inset-0 bg-ink mix-blend-screen"
         initial={false}
         animate={{ opacity: playing ? [0, 0.6, 0.08] : 0 }}
-        transition={{ duration: 0.9, ease: sceneEase, delay: playing ? delay : 0 }}
+        transition={{ duration: 0.34, ease: sceneEase, delay: playing ? delay : 0 }}
       />
       <div
         className="absolute rounded-full mix-blend-screen"
@@ -80,7 +80,7 @@ function JammedMicrophone({ tile, playing, delay }: JammedMicrophoneProps) {
       style={{ left: tile.x + 48, top: tile.y + 116, width: tile.w - 96, height: 232 }}
       initial={false}
       animate={{ opacity: playing ? 1 : 0 }}
-      transition={playing ? { duration: 0.6, ease: sceneEase, delay } : quickFade}
+      transition={playing ? { duration: 0.24, ease: sceneEase, delay } : quickFade}
     >
       {playing && <Noise count={90} className="size-full" />}
     </motion.div>

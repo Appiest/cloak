@@ -5,7 +5,7 @@ type Cue = { speaker: string; line: string };
 export const cues: Record<Beat, Cue | undefined> = {
   title: undefined,
   alone: { speaker: "Alex", line: "Imagine a world where you are never completely alone." },
-  watched: { speaker: "Matthew", line: "Someone is always watching your actions," },
+  watched: { speaker: "Matthew", line: "Something is always watching your actions," },
   unseen: { speaker: "Matthew", line: "and nothing you do or say goes unseen or unheard." },
   everywhere: { speaker: "Brendan", line: "Do you live in fear of being constantly surveilled?" },
   who: {
@@ -17,17 +17,18 @@ export const cues: Record<Beat, Cue | undefined> = {
   perDay: { speaker: "Matthew", line: "The average person is caught on camera over 75 times a day." },
   foundCamera: {
     speaker: "Alex",
-    line: "A recent survey of 1,050 people found that around half of the sample have discovered a camera installed at rental properties.",
+    line: "A recent survey of over a thousand people found that around half have discovered some kind of camera installed at a rental property.",
   },
   cantDetect: {
     speaker: "Alex",
-    line: "While many people worry about hidden cameras in the places that they stay, 64% say they wouldn’t know where to look.",
+    line: "And while many people worry about hidden cameras, 64% don’t know where to look.",
   },
-  cloned: {
+  impersonate: {
     speaker: "Ada",
     line: "And that’s not even the scariest part. The audio and video footage collected can be manipulated by AI and used to impersonate,",
   },
-  undetected: { speaker: "Ada", line: "frame, and exploit you and the people closest to you." },
+  frame: { speaker: "Ada", line: "frame," },
+  exploit: { speaker: "Ada", line: "and exploit you and the people closest to you." },
   watchers: {
     speaker: "Brendan",
     line: "We’ve already seen how legislation lags far behind the rocket ship of technological advancement.",
@@ -36,11 +37,11 @@ export const cues: Record<Beat, Cue | undefined> = {
     speaker: "Brendan",
     line: "To protect you and your loved ones, we need to design our own solution to evade machine intelligence.",
   },
-  capOn: { speaker: "Christine", line: "And that’s why we’ve created Cloak, a sleek, stylish baseball cap" },
-  parts: { speaker: "Christine", line: "that combines infrared and LRAD technology to make it impossible to record you." },
+  capOn: { speaker: "Christine", line: "That’s why we’ve created Cloak, a sleek, stylish baseball cap" },
+  parts: { speaker: "Christine", line: "that combines infrared and ultrasonic transducer technology, making it impossible to record you." },
   irLight: {
     speaker: "Ada",
-    line: "By projecting a strong beam of infrared light, non-destructive to the human eye, towards camera lenses,",
+    line: "By projecting a strong beam of infrared light towards camera lenses,",
   },
   noFace: { speaker: "Ada", line: "Cloak turns you into a white blob." },
   ringOut: {
@@ -49,13 +50,13 @@ export const cues: Record<Beat, Cue | undefined> = {
   },
   jammed: {
     speaker: "Matthew",
-    line: "and make any audio captured unusable, keeping your voice private and your thoughts secret.",
+    line: "and make any audio captured unusable, keeping your voice private.",
   },
   demo: { speaker: "Christine", line: "Let’s watch how Cloak protects our friend Alex in this video:" },
   video: { speaker: "Video", line: "The video plays with sound. Alex speaks when it ends." },
   takeHome: {
     speaker: "Alex",
-    line: "That was awesome, but what’s even more awesome, is that we made a model for you to take home.",
+    line: "That was awesome, but what’s even more awesome is that we built a real, functioning model.",
   },
   humanFirst: {
     speaker: "Christine",
@@ -67,6 +68,7 @@ export const cues: Record<Beat, Cue | undefined> = {
   },
   together: {
     speaker: "Brendan",
-    line: "So together, let’s Cloak ourselves, and protect the people dearest to us from machine surveillance, bringing security, privacy, and safety to all.",
+    line: "So together, let’s Cloak ourselves, protecting the people dearest to us from machine surveillance.",
   },
+  thanks: { speaker: "Ada", line: "Thank you." },
 };

@@ -13,23 +13,23 @@ type Stat = { value: number; suffix: string; label: string; source: Source; high
 
 const stats: Partial<Record<Beat, Stat>> = {
   perDay: {
-    value: 70,
-    suffix: "",
-    label: "times a day the average Briton is caught on camera, by a 2011 police estimate",
+    value: 75,
+    suffix: "+",
+    label: "times a day the average person is caught on camera",
     source: sources.ukCctvEstimate,
-    highlighted: 70,
+    highlighted: 75,
   },
   foundCamera: {
-    value: 47,
+    value: 50,
     suffix: "%",
-    label: "of Americans surveyed say they’ve discovered a camera in a rental property",
+    label: "found some kind of camera in a rental property",
     source: sources.rentalSurvey,
-    highlighted: 47,
+    highlighted: 50,
   },
   cantDetect: {
     value: 64,
     suffix: "%",
-    label: "don’t know how to detect a hidden camera in a rental",
+    label: "would not know where to look for one",
     source: sources.rentalSurvey,
     highlighted: 64,
   },
@@ -37,7 +37,7 @@ const stats: Partial<Record<Beat, Stat>> = {
 
 type GridLayout = { columns: number; cell: number; gap: number; x: number; y: number; count: number };
 
-const cameraRow: GridLayout = { columns: 14, cell: 68, gap: 12, x: 732, y: 330, count: 70 };
+const cameraRow: GridLayout = { columns: 15, cell: 68, gap: 12, x: 660, y: 300, count: 75 };
 const waffle: GridLayout = { columns: 10, cell: 58, gap: 12, x: 1152, y: 196, count: 100 };
 
 const layouts: Partial<Record<Beat, GridLayout>> = {
@@ -170,13 +170,18 @@ function Cell({ index, beat, layout, highlighted }: CellProps) {
         style={{ boxShadow: "0 0 10px 2px var(--color-mark-glow)" }}
         initial={false}
         animate={{ opacity: marked || beat === "perDay" ? 1 : 0 }}
-        transition={{ ...quickFade, delay: marked ? 0.6 + index * 0.02 : 0 }}
+        transition={{ ...quickFade, delay: seenDotDelay(beat, marked, index) }}
       />
     </motion.div>
   );
 }
 
 function cellDelay(beat: Beat, index: number): number {
-  if (beat === "perDay") return 0.3 + index * 0.024;
+  if (beat === "perDay") return 0.2 + index * 0.011;
   return index * 0.004;
+}
+
+function seenDotDelay(beat: Beat, marked: boolean, index: number): number {
+  if (beat === "perDay") return cellDelay(beat, index) + 0.1;
+  return marked ? 0.6 + index * 0.02 : 0;
 }

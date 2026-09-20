@@ -2,7 +2,7 @@
 
 import { Microphone } from "@phosphor-icons/react";
 import { animate, motion, useMotionValue, useTransform, type MotionValue } from "motion/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { monitorScale, monitorTiles, pointOnFigure, standingAt, wallTiles, type Placement, type Rect } from "../geometry";
 import { moveFor, quickFade, sceneEase } from "../motion";
 import { Noise } from "../parts/Noise";
@@ -34,7 +34,19 @@ const legs: Partial<Record<Beat, Leg>> = {
 const feedBeats: Beat[] = ["everywhere", "who"];
 
 const walkingSpeed = 80;
-const longestLeg = 560;
+const catchUpSpeed = 200;
+
+const walkOrder: Beat[] = ["alone", "watched", "unseen", "everywhere"];
+
+function continuesWalk(from: Beat | undefined, to: Beat) {
+  if (!from) return false;
+  const previous = walkOrder.indexOf(from);
+  return previous >= 0 && walkOrder.indexOf(to) === previous + 1;
+}
+
+function paceFrom(leg: Leg, position: number) {
+  return position < leg.from ? catchUpSpeed : walkingSpeed;
+}
 
 const homeStretch = 1640;
 
@@ -82,12 +94,22 @@ export function useFrontDoor(beat: Beat, travel: MotionValue<number>) {
   const presence = useMotionValue(1);
   const doorOpen = useMotionValue(0);
   useEffect(() => {
+    if (beat === "who") {
+      // The camera keeps dollying for 5.5s here, so the figure and the door
+      // have to finish on a curve too. Snapping them reads as a separate,
+      // much faster move and breaks the single-shot illusion.
+      const settling = { duration: 0.7, ease: sceneEase };
+      const leaving = animate(presence, 0, settling);
+      const shutting = animate(doorOpen, 0, settling);
+      return () => [leaving, shutting].forEach((controls) => controls.stop());
+    }
     if (beat !== "everywhere") {
-      presence.set(beat === "who" ? 0 : 1);
+      presence.set(1);
       doorOpen.set(0);
       return;
     }
-    const arrival = Math.max(0, (legs.everywhere!.to - travel.get()) / walkingSpeed);
+    const leg = legs.everywhere!;
+    const arrival = Math.max(0, (leg.to - travel.get()) / paceFrom(leg, travel.get()));
     const opening = animate(doorOpen, 1, { duration: doorway.opens, delay: arrival, ease: sceneEase });
     const entering = animate(presence, 0, { duration: doorway.stepsIn, delay: arrival + doorway.opens, ease: "easeIn" });
     const closing = animate(doorOpen, 0, { duration: doorway.closes, delay: arrival + doorway.opens + doorway.stepsIn + 0.2, ease: sceneEase });
@@ -98,13 +120,18 @@ export function useFrontDoor(beat: Beat, travel: MotionValue<number>) {
 
 export function useStreetTravel(beat: Beat) {
   const travel = useMotionValue(0);
+  const cameFrom = useRef<Beat>(undefined);
   useEffect(() => {
     const leg = legs[beat];
+    const previous = cameFrom.current;
+    cameFrom.current = beat;
     if (!leg) return;
-    const skippedAhead = travel.get() < leg.from - longestLeg;
-    if (travel.get() >= leg.to || skippedAhead) travel.set(leg.from);
+    if (!continuesWalk(previous, beat)) travel.set(leg.from);
     const remaining = leg.to - travel.get();
-    const controls = animate(travel, leg.to, { duration: remaining / walkingSpeed, ease: "linear" });
+    const controls = animate(travel, leg.to, {
+      duration: remaining / paceFrom(leg, travel.get()),
+      ease: "linear",
+    });
     return () => controls.stop();
   }, [beat, travel]);
   return travel;
