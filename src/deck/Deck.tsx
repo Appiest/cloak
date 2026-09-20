@@ -4,6 +4,7 @@ import { MotionConfig } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { Scene } from "./Scene";
 import { DemoVideo } from "./scenes/DemoVideo";
+import { PrototypePhoto } from "./scenes/Closing";
 import { outline, slides } from "./script";
 import { Rehearsal } from "./Rehearsal";
 import { Stage } from "./Stage";
@@ -37,7 +38,14 @@ export function Deck({ initial }: { initial: Position }) {
         <p className="sr-only" aria-live="polite">
           {`Slide ${position.slide + 1} of ${slides.length}, beat ${position.beat + 1}`}
         </p>
-        <Stage foreground={<DemoVideo beat={beat} />}>
+        <Stage
+          foreground={
+            <>
+              <PrototypePhoto beat={beat} />
+              <DemoVideo beat={beat} />
+            </>
+          }
+        >
           <Scene beat={beat} />
         </Stage>
         <Rehearsal position={position} beat={beat} />
