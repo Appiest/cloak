@@ -17,32 +17,40 @@ const photo = { x: 430, y: 110, w: 1060, h: 707 };
 // The one bright frame in the deck. After eleven slides of surveillance dark,
 // the real object arrives lit and clean, and the illustration steps aside so
 // nothing competes with it.
+// Rendered through Stage's foreground slot so the scanline and grain layers do
+// not sit on it. Everything else in the deck is a feed; this is the object.
+export function PrototypePhoto({ beat }: { beat: Beat }) {
+  const visible = beat === "takeHome";
+  return (
+    <motion.div
+      className="pointer-events-none absolute overflow-hidden"
+      style={{
+        left: photo.x,
+        top: photo.y,
+        width: photo.w,
+        height: photo.h,
+        boxShadow: "0 40px 90px oklch(0 0 0 / 0.75), 0 0 0 1px oklch(1 0 0 / 0.08)",
+      }}
+      initial={false}
+      animate={{ opacity: visible ? 1 : 0, scale: visible ? 1 : 0.94, y: visible ? 0 : 24 }}
+      transition={{ ...sceneMove, delay: visible ? 0.25 : 0 }}
+    >
+      <Image
+        src="/photos/prototype-front.jpg"
+        alt="The Cloak prototype: a black baseball cap with an ultrasonic transducer module mounted on the front panel"
+        width={1536}
+        height={1024}
+        priority
+        className="size-full object-cover"
+      />
+    </motion.div>
+  );
+}
+
 export function TakeHome({ beat }: { beat: Beat }) {
   const visible = beat === "takeHome";
   return (
     <div className="pointer-events-none absolute inset-0">
-      <motion.div
-        className="absolute overflow-hidden"
-        style={{
-          left: photo.x,
-          top: photo.y,
-          width: photo.w,
-          height: photo.h,
-          boxShadow: "0 40px 90px oklch(0 0 0 / 0.75), 0 0 0 1px oklch(1 0 0 / 0.08)",
-        }}
-        initial={false}
-        animate={{ opacity: visible ? 1 : 0, scale: visible ? 1 : 0.94, y: visible ? 0 : 24 }}
-        transition={{ ...sceneMove, delay: visible ? 0.25 : 0 }}
-      >
-        <Image
-          src="/photos/prototype-front.jpg"
-          alt="The Cloak prototype: a black baseball cap with an ultrasonic transducer module mounted on the front panel"
-          width={1536}
-          height={1024}
-          priority
-          className="size-full object-cover"
-        />
-      </motion.div>
       <motion.h2
         className="type-display absolute inset-x-0 top-[880px] text-center text-[120px] text-ink"
         initial={false}
