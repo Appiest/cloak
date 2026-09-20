@@ -6,7 +6,7 @@ import type { Beat } from "../script";
 import type { Source } from "../sources";
 import { SourceNote } from "./SourceNote";
 
-export type SourceBlock = { list: Source[]; left: number; width: number };
+export type SourceBlock = { list: Source[]; left: number; width: number; bottom?: number };
 
 export function SourceStack({ beat, blocks }: { beat: Beat; blocks: Partial<Record<Beat, SourceBlock>> }) {
   const block = blocks[beat];
@@ -15,8 +15,8 @@ export function SourceStack({ beat, blocks }: { beat: Beat; blocks: Partial<Reco
       {block && (
         <motion.div
           key={beat}
-          className="absolute bottom-[48px] space-y-2"
-          style={{ left: block.left, width: block.width }}
+          className="absolute space-y-2"
+          style={{ left: block.left, width: block.width, bottom: block.bottom ?? 120 }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

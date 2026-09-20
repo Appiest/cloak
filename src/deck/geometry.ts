@@ -74,3 +74,7 @@ export function tileScale(tile: Rect): number {
 }
 
 export const sideFeed: Rect = { x: 760, y: 110, w: 1060, h: 640 };
+
+// Slides 7 to 9 are one continuous look at the product, so the person holds
+// this mark throughout and only the graphics around him change.
+export const productStage: Placement = headAt(960, 470, 4.4);

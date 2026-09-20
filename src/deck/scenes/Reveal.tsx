@@ -1,14 +1,14 @@
 "use client";
 
 import { motion } from "motion/react";
-import { headAt, pointOnFigure, type Placement } from "../geometry";
-import { quickFade, sceneEase, sceneMove } from "../motion";
+import { pointOnFigure, productStage, type Placement } from "../geometry";
+import { quickFade, sceneEase } from "../motion";
 import { capAnchors } from "../parts/Cap";
 import type { Beat } from "../script";
 
 export const revealHero = {
-  capOn: headAt(1300, 440, 5),
-  parts: headAt(960, 460, 5),
+  capOn: productStage,
+  parts: productStage,
 } satisfies Partial<Record<Beat, Placement>>;
 
 type Side = "left" | "right";
@@ -43,21 +43,9 @@ const sides: Record<Side, { anchorOffset: number; textAlign: "left" | "right" }>
 };
 
 export function Reveal({ beat }: { beat: Beat }) {
-  const introducing = beat === "capOn";
   const labelling = beat === "parts";
   return (
     <div className="pointer-events-none absolute inset-0">
-      <motion.div
-        className="absolute left-[120px] top-[250px] w-[760px]"
-        initial={false}
-        animate={{ opacity: introducing ? 1 : 0, x: introducing ? 0 : -40 }}
-        transition={{ ...sceneMove, delay: introducing ? 0.9 : 0 }}
-      >
-        <h2 className="type-display text-[340px] text-ink">Cloak</h2>
-        <p className="type-label mt-6 text-ink-muted" style={{ textWrap: "balance" }}>
-          A baseball cap designed to keep cameras and microphones from recording you
-        </p>
-      </motion.div>
       {callouts.map((callout, index) => (
         <CalloutMark key={callout.title} callout={callout} visible={labelling} order={index} />
       ))}

@@ -13,18 +13,18 @@ type Stat = { value: number; suffix: string; label: string; source: Source; high
 
 const stats: Partial<Record<Beat, Stat>> = {
   perDay: {
-    value: 75,
-    suffix: "+",
-    label: "times a day the average person is caught on camera",
-    source: sources.ukCctvEstimate,
-    highlighted: 75,
+    value: 238,
+    suffix: "",
+    label: "times a week the average American is recorded",
+    source: sources.weeklyCameraCount,
+    highlighted: 238,
   },
   foundCamera: {
-    value: 50,
+    value: 47,
     suffix: "%",
     label: "found some kind of camera in a rental property",
     source: sources.rentalSurvey,
-    highlighted: 50,
+    highlighted: 47,
   },
   cantDetect: {
     value: 64,
@@ -35,22 +35,22 @@ const stats: Partial<Record<Beat, Stat>> = {
   },
 };
 
-type GridLayout = { columns: number; cell: number; gap: number; x: number; y: number; count: number };
+type GridLayout = { columns: number; cell: number; gap: number; rowGap?: number; x: number; y: number; count: number };
 
-const cameraRow: GridLayout = { columns: 15, cell: 68, gap: 12, x: 660, y: 300, count: 75 };
+// 34 a day across, seven days down. The block is the week.
+const weekGrid: GridLayout = { columns: 34, cell: 26, gap: 8, rowGap: 18, x: 648, y: 372, count: 238 };
 const waffle: GridLayout = { columns: 10, cell: 58, gap: 12, x: 1152, y: 196, count: 100 };
 
 const layouts: Partial<Record<Beat, GridLayout>> = {
-  perDay: cameraRow,
+  perDay: weekGrid,
   foundCamera: waffle,
   cantDetect: waffle,
 };
 
 function cellOrigin(layout: GridLayout, index: number) {
-  const pitch = layout.cell + layout.gap;
   return {
-    x: layout.x + (index % layout.columns) * pitch,
-    y: layout.y + Math.floor(index / layout.columns) * pitch,
+    x: layout.x + (index % layout.columns) * (layout.cell + layout.gap),
+    y: layout.y + Math.floor(index / layout.columns) * (layout.cell + (layout.rowGap ?? layout.gap)),
   };
 }
 
@@ -60,18 +60,19 @@ function heroInFirstCell(layout: GridLayout): Placement {
 }
 
 export const countedHero = {
-  perDay: heroInFirstCell(cameraRow),
+  // Too small to read inside a 26px cell, so the hero stands beside the block.
+  perDay: standingAt(300, 1000, 300),
   foundCamera: heroInFirstCell(waffle),
   cantDetect: heroInFirstCell(waffle),
 } satisfies Partial<Record<Beat, Placement>>;
 
-const cellIndexes = Array.from({ length: 100 }, (_, index) => index);
+const cellIndexes = Array.from({ length: weekGrid.count }, (_, index) => index);
 
 const tones = {
   plain: { background: "var(--color-feed)", figure: 0.35 },
   foundCamera: { background: "var(--color-feed)", figure: 1 },
   cantDetect: { background: "var(--color-ink)", figure: 1 },
-  perDay: { background: "var(--color-feed)", figure: 1 },
+  perDay: { background: "var(--color-feed)", figure: 0 },
 };
 
 function cellTone(beat: Beat, index: number, highlighted: number) {
@@ -81,7 +82,7 @@ function cellTone(beat: Beat, index: number, highlighted: number) {
 
 export function Counted({ beat }: { beat: Beat }) {
   const stat = stats[beat];
-  const layout = layouts[beat] ?? cameraRow;
+  const layout = layouts[beat] ?? weekGrid;
   return (
     <div className="pointer-events-none absolute inset-0">
       {cellIndexes.map((index) => (
@@ -120,7 +121,7 @@ export function Counted({ beat }: { beat: Beat }) {
         {stat && (
           <motion.div
             key={stat.source.url}
-            className="absolute bottom-[64px] left-[100px]"
+            className="absolute bottom-[120px] left-[100px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -177,7 +178,7 @@ function Cell({ index, beat, layout, highlighted }: CellProps) {
 }
 
 function cellDelay(beat: Beat, index: number): number {
-  if (beat === "perDay") return 0.2 + index * 0.011;
+  if (beat === "perDay") return 0.2 + index * 0.004;
   return index * 0.004;
 }
 

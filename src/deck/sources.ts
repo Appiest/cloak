@@ -6,6 +6,10 @@ export const sources = {
       "UK police estimate by Deputy Chief Constable Graeme Gerrard, as reported by the Press Association. Security Buyer, 3 March 2011.",
     url: "https://securitybuyer.com/in-the-press-how-the-media-is-reporting-the-1-85-million-cameras-story/",
   },
+  weeklyCameraCount: {
+    citation: "Safety.com, via StudyFinds, 24 September 2020.",
+    url: "https://studyfinds.com/americans-security-cameras-study/",
+  },
   rentalSurvey: {
     citation: "IPX1031, Surveillance Camera Use in Short-Term Rentals. Survey of 1,050 US adults, June 2025.",
     url: "https://www.ipx1031.com/surveillance-rental-study/",
