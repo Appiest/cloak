@@ -19,7 +19,7 @@ const [slide, beat] = arg("from", "3.1").split(".");
 const frames = arg("frames", "0,300,600,900,1400").split(",").map(Number);
 const outDir = arg("out", "/tmp/deck-frames");
 const label = arg("label", `beat${slide}_${beat}`);
-const url = `http://localhost:3000/present?slide=${slide}&beat=${beat}`;
+const url = `http://localhost:3001/present?slide=${slide}&beat=${beat}`;
 
 mkdirSync(outDir, { recursive: true });
 

@@ -6,6 +6,10 @@ import { sceneEase } from "../motion";
 import type { Beat } from "../script";
 
 const fadeToBlackSeconds = 0.8;
+// Leaving the video, the black backing holds while the scene underneath
+// finishes changing. Without the hold you catch the previous slide mid-move
+// through the gap.
+const holdBlackSeconds = 0.55;
 
 export function DemoVideo({ beat }: { beat: Beat }) {
   const playing = beat === "video";
@@ -29,7 +33,11 @@ export function DemoVideo({ beat }: { beat: Beat }) {
       style={{ x: 0, y: 0, width: "100%", height: "100%" }}
       initial={false}
       animate={{ opacity: playing ? 1 : 0 }}
-      transition={{ duration: fadeToBlackSeconds, ease: sceneEase }}
+      transition={{
+        duration: fadeToBlackSeconds,
+        ease: sceneEase,
+        delay: playing ? 0 : holdBlackSeconds,
+      }}
     >
       <motion.video
         ref={video}

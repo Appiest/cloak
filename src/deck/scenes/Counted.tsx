@@ -61,7 +61,7 @@ function heroInFirstCell(layout: GridLayout): Placement {
 
 export const countedHero = {
   // Too small to read inside a 26px cell, so the hero stands beside the block.
-  perDay: standingAt(300, 1000, 300),
+  perDay: standingAt(300, 900, 190),
   foundCamera: heroInFirstCell(waffle),
   cantDetect: heroInFirstCell(waffle),
 } satisfies Partial<Record<Beat, Placement>>;

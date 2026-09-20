@@ -8,7 +8,7 @@ import { setTimeout as wait } from "node:timers/promises";
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const PORT = 9334;
 const profile = mkdtempSync(join(tmpdir(), "probe-"));
-const url = "http://localhost:3000/present?slide=3&beat=1";
+const url = "http://localhost:3001/present?slide=3&beat=1";
 
 const chrome = spawn(CHROME, [
   `--remote-debugging-port=${PORT}`,
