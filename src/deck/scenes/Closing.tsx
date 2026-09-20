@@ -5,7 +5,7 @@ import { quickFade, sceneEase, sceneMove } from "../motion";
 import { Cap } from "../parts/Cap";
 import { CountUp } from "../parts/CountUp";
 import { SourceStack, type SourceBlock } from "../parts/SourceStack";
-import type { Beat } from "../script";
+import { isAtOrAfter, type Beat } from "../script";
 import { sources } from "../sources";
 
 const beatSources: Partial<Record<Beat, SourceBlock>> = {
@@ -42,7 +42,7 @@ export function TakeHome({ beat }: { beat: Beat }) {
         animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 24 }}
         transition={{ ...sceneMove, delay: visible ? 0.8 : 0 }}
       >
-        Take a Cloak model home
+        We built a working prototype
       </motion.h2>
     </div>
   );
@@ -54,6 +54,7 @@ const flockStats = [
 ];
 
 export function Closing({ beat }: { beat: Beat }) {
+  const wordmarkUp = isAtOrAfter(beat, "together");
   return (
     <div className="pointer-events-none absolute inset-0">
       <AnimatePresence>
@@ -82,7 +83,7 @@ export function Closing({ beat }: { beat: Beat }) {
       <motion.h2
         className="type-display absolute inset-x-0 top-[70px] text-center text-[260px] text-ink"
         initial={false}
-        animate={{ opacity: beat === "together" ? 1 : 0, y: beat === "together" ? 0 : -30 }}
+        animate={{ opacity: wordmarkUp ? 1 : 0, y: wordmarkUp ? 0 : -30 }}
         transition={{ duration: 1.1, ease: sceneEase, delay: beat === "together" ? 2.2 : 0 }}
       >
         Cloak

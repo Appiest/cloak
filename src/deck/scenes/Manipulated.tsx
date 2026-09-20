@@ -1,203 +1,224 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
-import { figureSize, standingAt, type Placement } from "../geometry";
+import { motion } from "motion/react";
+import { figureSize, pointOnFigure, standingAt, type Placement } from "../geometry";
 import { pick, quickFade, sceneEase, sceneMove } from "../motion";
-import { CountUp } from "../parts/CountUp";
+import { Brackets } from "../parts/Brackets";
 import { Figure } from "../parts/Figure";
-import { SourceNote } from "../parts/SourceNote";
-import { Waveform } from "../parts/Waveform";
 import type { Beat } from "../script";
-import { sources } from "../sources";
 
-const spotted = 0.73;
+export type ManipulatedVariant = "faces" | "strings";
 
-export const splitBar = { x: 100, y: 700, w: 1720, h: 56 };
-const missedCenterX = splitBar.x + splitBar.w * (spotted + (1 - spotted) / 2);
+export const variant: ManipulatedVariant = "faces";
+
+const you = standingAt(620, 880, 470);
+const stolen = standingAt(1320, 880, 470);
+
+const closest: Placement[] = [
+  standingAt(240, 905, 430),
+  standingAt(1000, 915, 450),
+  standingAt(1700, 900, 435),
+];
 
 export const manipulatedHero = {
-  cloned: standingAt(560, 700, 420),
-  undetected: standingAt(300, splitBar.y - 24, 220),
+  impersonate: you,
+  frame: you,
+  exploit: you,
 } satisfies Partial<Record<Beat, Placement>>;
 
-const clonePlacements: Partial<Record<Beat, Placement>> = {
-  cloned: standingAt(1360, 700, 420),
-  undetected: standingAt(missedCenterX, splitBar.y - 24, 220),
-};
+export const splitBar = { x: 100, y: 700, w: 1720, h: 56 };
+export const timelineAxisY = 560;
+
+const yourHead = pointOnFigure(you, 100, 58);
+const stolenHead = pointOnFigure(stolen, 100, 58);
+const headRadius = pointOnFigure(you, 132, 58).x - yourHead.x;
+
+function useStage(beat: Beat) {
+  return {
+    impersonating: beat === "impersonate",
+    framing: beat === "frame",
+    exploiting: beat === "exploit",
+    present: beat === "impersonate" || beat === "frame" || beat === "exploit",
+  };
+}
 
 export function Manipulated({ beat }: { beat: Beat }) {
-  const cloning = beat === "cloned";
-  const measuring = beat === "undetected";
+  const stage = useStage(beat);
   return (
     <div className="pointer-events-none absolute inset-0">
-      <Clone beat={beat} />
-      <VoicePair visible={cloning} />
-      <AnimatePresence>
-        {cloning && (
-          <motion.figure
-            key="quote"
-            className="absolute inset-x-[260px] top-[90px] text-center"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ ...quickFade, delay: cloning ? 0.9 : 0 }}
-          >
-            <blockquote className="type-label text-ink" style={{ textWrap: "balance" }}>
-              “All he needs is a short audio clip of your family member’s voice — which he could get from content
-              posted online — and a voice-cloning program.”
-            </blockquote>
-            <figcaption className="type-source mt-4 text-ink-muted">US Federal Trade Commission, 2023</figcaption>
-          </motion.figure>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {measuring && (
-          <motion.div
-            key="stat"
-            className="absolute left-[100px] top-[110px] w-[1100px]"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={quickFade}
-          >
-            <p className="type-display text-[220px] text-ink">
-              <CountUp value={73} suffix="%" />
-            </p>
-            <p className="type-label mt-4 max-w-[900px] text-ink-muted" style={{ textWrap: "balance" }}>
-              is how often 529 listeners correctly spotted a deepfake voice when asked to find it
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <SourceLine beat={beat} />
+      <StolenBody shown={stage.present} />
+      <ClosestPeople shown={stage.exploiting} />
+      {variant === "faces" ? <LiftedFace stage={stage} /> : <ControlLines stage={stage} />}
+      <MarkedAsYou shown={stage.framing || stage.exploiting} />
     </div>
   );
 }
 
-function Clone({ beat }: { beat: Beat }) {
-  const placement = clonePlacements[beat];
+type Stage = ReturnType<typeof useStage>;
+
+function FigureAt({ place, opacity, delay, synthetic }: { place: Placement; opacity: number; delay: number; synthetic?: boolean }) {
   return (
     <motion.div
       className="absolute left-0 top-0 origin-top-left"
-      style={{ width: figureSize.w, height: figureSize.h }}
-      initial={{ ...manipulatedHero.cloned, opacity: 0 }}
-      animate={placement ? { ...placement, opacity: 1 } : { opacity: 0 }}
-      transition={{ ...sceneMove, delay: beat === "cloned" ? 0.3 : 0 }}
+      style={{ width: figureSize.w, height: figureSize.h, x: place.x, y: place.y, scale: place.scale }}
+      initial={false}
+      animate={{ opacity }}
+      transition={{ ...sceneMove, delay }}
     >
-      <Figure synthetic className="size-full" />
+      <Figure synthetic={synthetic} className="size-full" />
     </motion.div>
   );
 }
 
-function VoicePair({ visible }: { visible: boolean }) {
+function StolenBody({ shown }: { shown: boolean }) {
+  return <FigureAt place={stolen} opacity={shown ? 1 : 0} delay={shown ? 0.2 : 0} synthetic />;
+}
+
+function ClosestPeople({ shown }: { shown: boolean }) {
+  return (
+    <>
+      {closest.map((place, index) => (
+        <div key={place.x}>
+          <FigureAt place={place} opacity={shown ? 0.85 : 0} delay={shown ? 0.3 + index * 0.18 : 0} />
+          <BracketOn place={place} shown={shown} delay={1.1 + index * 0.22} />
+        </div>
+      ))}
+    </>
+  );
+}
+
+function BracketOn({ place, shown, delay }: { place: Placement; shown: boolean; delay: number }) {
+  const width = figureSize.w * place.scale;
+  const height = figureSize.h * place.scale;
   return (
     <motion.div
-      className="absolute inset-0"
+      className="absolute"
+      style={{ left: place.x - 18, top: place.y - 14, width: width + 36, height: height + 28 }}
       initial={false}
-      animate={{ opacity: visible ? 1 : 0 }}
-      transition={{ duration: 0.6, ease: sceneEase, delay: visible ? 0.5 : 0 }}
+      animate={{ opacity: shown ? 1 : 0, scale: shown ? 1 : 1.12 }}
+      transition={{ ...quickFade, delay: shown ? delay : 0 }}
     >
-      <div className="absolute left-[360px] top-[760px] h-[150px] w-[400px]">
-        <Waveform />
-      </div>
-      <div className="absolute left-[1160px] top-[760px] h-[150px] w-[400px]">
-        <Waveform barClassName="bg-mark" />
-      </div>
-      <svg className="absolute inset-0 size-full" viewBox="0 0 1920 1080" aria-hidden>
-        {visible &&
-          [0, 1, 2, 3].map((pulse) => (
-            <motion.circle
-              key={pulse}
-              r={6}
-              fill="var(--color-mark)"
-              initial={{ cx: 790, cy: 835, opacity: 0 }}
-              animate={{ cx: 1130, opacity: [0, 1, 1, 0] }}
-              transition={{ duration: 1.6, ease: "linear", repeat: Infinity, delay: 1 + pulse * 0.4 }}
-            />
-          ))}
-      </svg>
+      <Brackets arm={52} weight={6} />
     </motion.div>
+  );
+}
+
+function MarkedAsYou({ shown }: { shown: boolean }) {
+  return <BracketOn place={you} shown={shown} delay={0.35} />;
+}
+
+const faceTravel = { duration: 1.5, ease: sceneEase, delay: 0.7 };
+
+function LiftedFace({ stage }: { stage: Stage }) {
+  const lifted = stage.framing || stage.exploiting || stage.impersonating;
+  const landed = stage.framing || stage.exploiting;
+  const from = { x: yourHead.x, y: yourHead.y };
+  const to = { x: stolenHead.x, y: stolenHead.y };
+  return (
+    <motion.svg
+      className="absolute inset-0 size-full overflow-visible"
+      viewBox="0 0 1920 1080"
+      initial={false}
+      animate={{ opacity: lifted ? 1 : 0 }}
+      transition={quickFade}
+      aria-hidden
+    >
+      <motion.g
+        initial={false}
+        animate={{ x: landed ? to.x - from.x : 0, y: landed ? to.y - from.y : 0 }}
+        transition={stage.framing ? faceTravel : { duration: 0 }}
+      >
+        <ellipse
+          cx={from.x}
+          cy={from.y}
+          rx={headRadius * 1.05}
+          ry={headRadius * 1.35}
+          fill="none"
+          stroke="var(--color-mark)"
+          strokeWidth="3"
+          style={{ filter: "drop-shadow(0 0 14px var(--color-mark-glow))" }}
+        />
+        {[-0.5, -0.17, 0.17, 0.5].map((offset) => (
+          <line
+            key={offset}
+            x1={from.x - headRadius * 0.95}
+            x2={from.x + headRadius * 0.95}
+            y1={from.y + headRadius * 1.3 * offset}
+            y2={from.y + headRadius * 1.3 * offset}
+            stroke="var(--color-mark)"
+            strokeWidth="1.5"
+            opacity="0.55"
+          />
+        ))}
+      </motion.g>
+    </motion.svg>
+  );
+}
+
+const rigPoints = [
+  { x: 100, y: 30 },
+  { x: 74, y: 96 },
+  { x: 126, y: 96 },
+  { x: 84, y: 178 },
+  { x: 116, y: 178 },
+];
+
+function ControlLines({ stage }: { stage: Stage }) {
+  const rigged = stage.impersonating || stage.framing || stage.exploiting;
+  const reaching = stage.exploiting;
+  return (
+    <motion.svg
+      className="absolute inset-0 size-full overflow-visible"
+      viewBox="0 0 1920 1080"
+      initial={false}
+      animate={{ opacity: rigged ? 1 : 0 }}
+      transition={quickFade}
+      aria-hidden
+    >
+      {rigPoints.map((point, index) => (
+        <Thread key={`you-${point.x}-${point.y}`} target={pointOnFigure(you, point.x, point.y)} shown={rigged} delay={index * 0.09} />
+      ))}
+      {closest.map((place, index) =>
+        rigPoints.slice(0, 3).map((point) => (
+          <Thread
+            key={`near-${place.x}-${point.x}`}
+            target={pointOnFigure(place, point.x, point.y)}
+            shown={reaching}
+            delay={0.5 + index * 0.2}
+          />
+        )),
+      )}
+    </motion.svg>
+  );
+}
+
+function Thread({ target, shown, delay }: { target: { x: number; y: number }; shown: boolean; delay: number }) {
+  return (
+    <motion.line
+      x1={target.x}
+      y1={-60}
+      x2={target.x}
+      y2={target.y}
+      stroke="var(--color-mark)"
+      strokeWidth="2"
+      opacity="0.8"
+      style={{ filter: "drop-shadow(0 0 8px var(--color-mark-glow))" }}
+      initial={false}
+      animate={{ pathLength: shown ? 1 : 0, opacity: shown ? 0.8 : 0 }}
+      transition={{ duration: 0.7, ease: sceneEase, delay: shown ? delay : 0 }}
+    />
   );
 }
 
 export function SplitBar({ beat }: { beat: Beat }) {
-  const measuring = beat === "undetected";
-  const axis = beat === "watchers" || beat === "protections";
-  const opacity = pick({ undetected: 1, watchers: 1, protections: 1 }, beat, 0);
+  const opacity = pick({ watchers: 1, protections: 1 }, beat, 0);
   return (
     <motion.div
-      className="absolute left-0 top-0 flex"
+      className="absolute left-0 top-0 bg-line"
       initial={false}
-      animate={{
-        opacity,
-        x: splitBar.x,
-        y: axis ? timelineAxisY : splitBar.y,
-        width: splitBar.w,
-        height: axis ? 4 : splitBar.h,
-      }}
+      animate={{ opacity, x: splitBar.x, y: timelineAxisY, width: splitBar.w, height: 4 }}
       transition={sceneMove}
-    >
-      <motion.div
-        className="relative h-full origin-left bg-line"
-        style={{ width: `${spotted * 100}%` }}
-        initial={false}
-        animate={{ scaleX: opacity ? 1 : 0 }}
-        transition={{ ...sceneMove, delay: measuring ? 0.3 : 0 }}
-      >
-        <BarLabel visible={measuring} className="left-0">
-          Spotted
-        </BarLabel>
-      </motion.div>
-      <motion.div
-        className="relative h-full flex-1"
-        initial={false}
-        animate={{ opacity: opacity ? 1 : 0 }}
-        style={{
-          background: axis
-            ? "var(--color-line)"
-            : "repeating-linear-gradient(135deg, var(--color-mark) 0 10px, transparent 10px 20px)",
-        }}
-        transition={{ ...quickFade, delay: measuring ? 1.2 : 0 }}
-      >
-        <BarLabel visible={measuring} className="right-0 text-mark">
-          Missed
-        </BarLabel>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-export const timelineAxisY = 560;
-
-function BarLabel({ visible, className, children }: { visible: boolean; className: string; children: string }) {
-  return (
-    <motion.span
-      className={`type-label absolute top-[76px] whitespace-nowrap text-[32px] text-ink-muted ${className}`}
-      initial={false}
-      animate={{ opacity: visible ? 1 : 0 }}
-      transition={{ ...quickFade, delay: visible ? 1.4 : 0 }}
-    >
-      {children}
-    </motion.span>
-  );
-}
-
-function SourceLine({ beat }: { beat: Beat }) {
-  const source = pick({ cloned: sources.ftcVoiceCloning, undetected: sources.deepfakeDetection }, beat, undefined);
-  return (
-    <AnimatePresence mode="wait">
-      {source && (
-        <motion.div
-          key={source.url}
-          className="absolute bottom-[64px] left-[100px]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={quickFade}
-        >
-          <SourceNote source={source} />
-        </motion.div>
-      )}
-    </AnimatePresence>
+      aria-hidden
+    />
   );
 }

@@ -1,11 +1,10 @@
 "use client";
 
 import { Microphone } from "@phosphor-icons/react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { useId } from "react";
 import { headAt, pointOnFigure, sideFeed, type Placement } from "../geometry";
 import { quickFade, sceneEase, sceneMove } from "../motion";
-import { CountUp } from "../parts/CountUp";
 import { Noise } from "../parts/Noise";
 import { Osd } from "../parts/Osd";
 import { SourceStack, type SourceBlock } from "../parts/SourceStack";
@@ -34,44 +33,10 @@ export function Ultrasonic({ beat }: { beat: Beat }) {
   const jamming = beat === "jammed";
   return (
     <div className="pointer-events-none absolute inset-0">
-      <AnimatePresence>
-        {radiating && (
-          <motion.div
-            key="explain"
-            className="absolute left-[100px] top-[110px] w-[680px]"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12, transition: quickFade }}
-            transition={{ ...quickFade, delay: 0.6 }}
-          >
-            <h2 className="type-display text-[150px] text-ink">Ultrasound jams microphones</h2>
-            <p className="type-label mt-8 text-ink-muted" style={{ textWrap: "pretty" }}>
-              A ring of transducers in the band plays ultrasound, which is too high for people to hear. Microphone
-              circuits distort it into noise that covers your voice.
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
       {microphones.map((microphone, index) => (
         <MicrophoneMark key={microphone.name} {...microphone} visible={radiating} order={index} />
       ))}
       <MicrophoneFeed visible={jamming} />
-      <AnimatePresence>{jamming && <JamRate key="rate" />}</AnimatePresence>
-      <AnimatePresence>
-        {jamming && (
-          <motion.p
-            key="caveat"
-            className="type-label absolute text-[32px] text-ink-muted"
-            style={{ left: sideFeed.x, top: sideFeed.y + sideFeed.h + 32, width: sideFeed.w, textWrap: "pretty" }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: quickFade }}
-            transition={{ ...quickFade, delay: 1.6 }}
-          >
-            Signals from two transducers can cancel out and leave blind spots, but moving around helps cover them.
-          </motion.p>
-        )}
-      </AnimatePresence>
       <SourceStack beat={beat} blocks={beatSources} />
     </div>
   );
@@ -211,46 +176,5 @@ function TranscriptWord({ word, heard, visible, order }: TranscriptWordProps) {
         aria-hidden
       />
     </span>
-  );
-}
-
-const comparison = [
-  { label: "Ring of transducers", value: 87, className: "bg-ink" },
-  { label: "Flat jammer, not aimed at the mic", value: 30, className: "bg-line" },
-];
-
-function JamRate() {
-  return (
-    <motion.div
-      className="absolute left-[100px] top-[110px] w-[600px]"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, transition: quickFade }}
-      transition={{ ...quickFade, delay: 0.4 }}
-    >
-      <p className="type-display text-[220px] text-ink">
-        <CountUp value={87} suffix="%" />
-      </p>
-      <p className="type-label mt-4 text-ink-muted" style={{ textWrap: "balance" }}>
-        of words jammed from any direction by a worn ring of ultrasonic transducers
-      </p>
-      <dl className="mt-10 space-y-5">
-        {comparison.map((row, index) => (
-          <div key={row.label}>
-            <dt className="type-source text-ink-muted">{row.label}</dt>
-            <dd className="mt-2 flex items-center gap-4">
-              <motion.span
-                className={`h-5 origin-left ${row.className}`}
-                style={{ width: `${row.value * 5}px` }}
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ ...sceneMove, delay: 0.8 + index * 0.2 }}
-              />
-              <span className="type-osd text-ink">{row.value}%</span>
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </motion.div>
   );
 }

@@ -23,33 +23,14 @@ const cameraFeed = sideFeed;
 const faceInFeed = headAt(cameraFeed.w / 2, 330, 4.8);
 
 const beatSources: Partial<Record<Beat, SourceBlock>> = {
-  irLight: { list: [sources.infraredMask], left: 1120, width: 700 },
+  irLight: { list: [sources.infraredMask], left: 100, width: 700 },
   noFace: { list: [sources.infraredMask, sources.phoneIrFilters], left: cameraFeed.x, width: cameraFeed.w },
 };
 
 export function Infrared({ beat }: { beat: Beat }) {
-  const lighting = beat === "irLight";
   const failing = beat === "noFace";
   return (
     <div className="pointer-events-none absolute inset-0">
-      <AnimatePresence>
-        {lighting && (
-          <motion.div
-            key="explain"
-            className="absolute left-[1120px] top-[300px] w-[700px]"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12, transition: quickFade }}
-            transition={{ ...quickFade, delay: lighting ? 0.6 : 0 }}
-          >
-            <h2 className="type-display text-[150px] text-ink">Infrared floods your face</h2>
-            <p className="type-label mt-8 text-ink-muted" style={{ textWrap: "pretty" }}>
-              The LEDs under the brim shine near-infrared light back at your face. People can’t see it, but most
-              surveillance cameras can.
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
       <CameraView visible={failing} />
       <AnimatePresence>
         {failing && (
