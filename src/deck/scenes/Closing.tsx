@@ -1,8 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
 import { quickFade, sceneEase, sceneMove } from "../motion";
-import { Cap } from "../parts/Cap";
 import { CountUp } from "../parts/CountUp";
 import { SourceStack, type SourceBlock } from "../parts/SourceStack";
 import { isAtOrAfter, type Beat } from "../script";
@@ -12,35 +12,42 @@ const beatSources: Partial<Record<Beat, SourceBlock>> = {
   flock: { list: [sources.flockAgencies, sources.flockStates], left: 100, width: 1720 },
 };
 
+const photo = { x: 430, y: 110, w: 1060, h: 707 };
+
+// The one bright frame in the deck. After eleven slides of surveillance dark,
+// the real object arrives lit and clean, and the illustration steps aside so
+// nothing competes with it.
 export function TakeHome({ beat }: { beat: Beat }) {
   const visible = beat === "takeHome";
   return (
     <div className="pointer-events-none absolute inset-0">
       <motion.div
-        className="absolute left-[510px] top-[150px] w-[900px]"
+        className="absolute overflow-hidden"
+        style={{
+          left: photo.x,
+          top: photo.y,
+          width: photo.w,
+          height: photo.h,
+          boxShadow: "0 40px 90px oklch(0 0 0 / 0.75), 0 0 0 1px oklch(1 0 0 / 0.08)",
+        }}
         initial={false}
-        animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : -120, rotate: visible ? -4 : -12 }}
-        transition={{ ...sceneMove, delay: visible ? 0.3 : 0 }}
+        animate={{ opacity: visible ? 1 : 0, scale: visible ? 1 : 0.94, y: visible ? 0 : 24 }}
+        transition={{ ...sceneMove, delay: visible ? 0.25 : 0 }}
       >
-        <motion.div
-          animate={visible ? { y: [0, -14, 0] } : { y: 0 }}
-          transition={{ duration: 3.2, ease: "easeInOut", repeat: Infinity }}
-        >
-          <Cap cropped glowing className="w-full" />
-        </motion.div>
+        <Image
+          src="/photos/prototype-front.jpg"
+          alt="The Cloak prototype: a black baseball cap with an ultrasonic transducer module mounted on the front panel"
+          width={1536}
+          height={1024}
+          priority
+          className="size-full object-cover"
+        />
       </motion.div>
-      <motion.div
-        className="absolute left-[610px] top-[790px] h-10 w-[700px] rounded-[50%]"
-        style={{ background: "radial-gradient(closest-side, oklch(0 0 0 / 0.7), transparent)" }}
-        initial={false}
-        animate={{ opacity: visible ? 1 : 0 }}
-        transition={sceneMove}
-      />
       <motion.h2
-        className="type-display absolute inset-x-0 top-[860px] text-center text-[120px] text-ink"
+        className="type-display absolute inset-x-0 top-[880px] text-center text-[120px] text-ink"
         initial={false}
         animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 24 }}
-        transition={{ ...sceneMove, delay: visible ? 0.8 : 0 }}
+        transition={{ ...sceneMove, delay: visible ? 0.7 : 0 }}
       >
         We built a working prototype
       </motion.h2>
