@@ -15,7 +15,7 @@ export function SourceStack({ beat, blocks }: { beat: Beat; blocks: Partial<Reco
       {block && (
         <motion.div
           key={beat}
-          className="absolute bottom-[48px] space-y-2"
+          className="absolute bottom-[120px] space-y-2"
           style={{ left: block.left, width: block.width }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -14,7 +14,7 @@ export const cues: Record<Beat, Cue | undefined> = {
   },
   reality: { speaker: "Christine", line: "We are already heading towards a world where this will be our reality." },
   whatNow: { speaker: "Ada", line: "So when it does happen, what are we going to do? (pause)" },
-  perDay: { speaker: "Matthew", line: "The average person is caught on camera over 75 times a day." },
+  perDay: { speaker: "Matthew", line: "The average person is caught on camera 238 times a week." },
   foundCamera: {
     speaker: "Alex",
     line: "A recent survey of over a thousand people found that around half have discovered some kind of camera installed at a rental property.",
@@ -56,7 +56,7 @@ export const cues: Record<Beat, Cue | undefined> = {
   video: { speaker: "Video", line: "The video plays with sound. Alex speaks when it ends." },
   takeHome: {
     speaker: "Alex",
-    line: "That was awesome, but what’s even more awesome is that we built a real, functioning model.",
+    line: "That was awesome, but what’s even more awesome is that we built a real, functioning prototype.",
   },
   humanFirst: {
     speaker: "Christine",
