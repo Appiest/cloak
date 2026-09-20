@@ -3,7 +3,7 @@
 import { Microphone } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { useId } from "react";
-import { headAt, pointOnFigure, sideFeed, type Placement } from "../geometry";
+import { pointOnFigure, productStage, type Placement } from "../geometry";
 import { quickFade, sceneEase, sceneMove } from "../motion";
 import { Noise } from "../parts/Noise";
 import { Osd } from "../parts/Osd";
@@ -13,13 +13,13 @@ import type { Beat } from "../script";
 import { sources } from "../sources";
 
 export const ultrasonicHero = {
-  ringOut: headAt(1330, 560, 4.2),
-  jammed: headAt(330, 880, 2.4),
+  ringOut: productStage,
+  jammed: productStage,
 } satisfies Partial<Record<Beat, Placement>>;
 
 const beatSources: Partial<Record<Beat, SourceBlock>> = {
-  ringOut: { list: [sources.wearableJammer], left: 100, width: 680 },
-  jammed: { list: [sources.wearableJammer], left: sideFeed.x, width: sideFeed.w },
+  ringOut: { list: [sources.wearableJammer], left: 100, width: 500 },
+  jammed: { list: [sources.wearableJammer], left: 100, width: 500 },
 };
 
 const microphones = [
@@ -47,8 +47,8 @@ const ringCycle = 3.2;
 const ringReach = 3.6;
 
 function bandEllipse() {
-  const center = pointOnFigure(ultrasonicHero.ringOut, 100, 50);
-  const edge = pointOnFigure(ultrasonicHero.ringOut, 134, 50);
+  const center = pointOnFigure(productStage, 100, 50);
+  const edge = pointOnFigure(productStage, 134, 50);
   const rx = edge.x - center.x;
   return { cx: center.x, cy: center.y, rx, ry: rx * 0.26 };
 }
@@ -130,32 +130,35 @@ const transcript = [
   { word: "today", heard: false },
 ];
 
+// Full width and behind him rather than a panel his head crashes into: the
+// waveform runs past on both sides, the redaction sits across his shoulders.
 function MicrophoneFeed({ visible }: { visible: boolean }) {
   return (
     <motion.div
-      className="absolute overflow-hidden bg-feed"
-      style={{ left: sideFeed.x, top: sideFeed.y, width: sideFeed.w, height: sideFeed.h }}
+      className="absolute inset-0"
       initial={false}
-      animate={{ opacity: visible ? 1 : 0, scale: visible ? 1 : 0.96 }}
+      animate={{ opacity: visible ? 1 : 0 }}
       transition={{ ...sceneMove, delay: visible ? 0.3 : 0 }}
     >
-      <div className="absolute inset-x-0 top-[70px] h-[340px]">
+      <div className="absolute" style={{ left: 90, right: 90, top: 250, height: 300 }}>
         <Waveform />
         <motion.div
-          className="absolute inset-x-12 top-1/2 h-64 -translate-y-1/2 mix-blend-screen"
+          className="absolute inset-x-0 top-1/2 h-56 -translate-y-1/2 mix-blend-screen"
           initial={false}
           animate={{ opacity: visible ? 1 : 0 }}
           transition={{ duration: 0.6, ease: sceneEase, delay: visible ? 1.2 : 0 }}
         >
-          {visible && <Noise count={120} className="size-full" />}
+          {visible && <Noise count={140} className="size-full" />}
         </motion.div>
       </div>
-      <p className="type-label absolute inset-x-12 bottom-20 flex flex-wrap items-center gap-x-5 gap-y-3 text-ink">
+      <p
+        className="type-label absolute flex flex-wrap items-center justify-center gap-x-6 gap-y-4 text-ink"
+        style={{ left: 140, right: 140, top: 870 }}
+      >
         {transcript.map((entry, index) => (
           <TranscriptWord key={entry.word} {...entry} visible={visible} order={index} />
         ))}
       </p>
-      <div className="absolute inset-0 shadow-[inset_0_0_0_1px_oklch(1_0_0/0.1)]" />
       <Osd camera="MIC 01" />
     </motion.div>
   );

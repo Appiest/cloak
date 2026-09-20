@@ -8,7 +8,9 @@ export const capLeds = [
   { x: 119, y: 63.5 },
 ];
 
-const transducerRing = { cx: 100, cy: 49, rx: 27, ry: 5.2, count: 14 };
+// Face-on, on the front panel, so it reads as a circle rather than a band
+// wrapping the crown.
+const transducerRing = { cx: 100, cy: 38, radius: 13, count: 12 };
 
 function round(value: number, places = 2) {
   const factor = 10 ** places;
@@ -17,19 +19,18 @@ function round(value: number, places = 2) {
 
 const transducers = Array.from({ length: transducerRing.count }, (_, index) => {
   const angle = (index / transducerRing.count) * Math.PI * 2;
-  const awayFromCamera = Math.cos(angle);
   return {
     id: index,
-    x: round(transducerRing.cx + transducerRing.rx * Math.sin(angle)),
-    y: round(transducerRing.cy - transducerRing.ry * awayFromCamera),
-    r: round(1.6 - awayFromCamera * 0.3),
-    opacity: round(0.75 - awayFromCamera * 0.25),
+    x: round(transducerRing.cx + transducerRing.radius * Math.sin(angle)),
+    y: round(transducerRing.cy - transducerRing.radius * Math.cos(angle)),
+    r: 1.6,
+    opacity: 0.8,
   };
 });
 
 export const capAnchors = {
   led: capLeds[0],
-  transducer: { x: transducerRing.cx + transducerRing.rx, y: transducerRing.cy },
+  transducer: { x: transducerRing.cx + transducerRing.radius, y: transducerRing.cy },
 };
 
 type CapProps = { className?: string; glowing?: boolean; ledColor?: string; cropped?: boolean };

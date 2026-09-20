@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, type Easing } from "motion/react";
 import { figureSize, standingAt } from "../geometry";
 import { pick, sceneEase } from "../motion";
 import { Brackets } from "../parts/Brackets";
@@ -51,6 +51,18 @@ function waveDelay(centerX: number, feetY: number): number {
   return Math.hypot(centerX - waveOrigin.x, feetY - waveOrigin.y) / waveSpeed;
 }
 
+// Hold while the caps light, fly forward through the crowd, then settle back
+// out onto all of them. The bloom peaks as the camera returns, so the reset is
+// hidden inside the flash and the slide lands on people, not on an empty frame.
+const flyThrough = {
+  animate: { opacity: [1, 1, 1, 1], scale: [1, 1.06, 2.6, 1] },
+  transition: {
+    duration: 3.6,
+    times: [0, 0.3, 0.68, 1],
+    ease: ["easeInOut", "easeIn", "easeOut"] satisfies Easing[],
+  },
+};
+
 export function Crowd({ beat }: { beat: Beat }) {
   const presence = pick({ reality: 1, whatNow: 0.14, flock: 1, together: 1 }, beat, 0);
   const watched = beat === "reality" || beat === "flock";
@@ -61,12 +73,12 @@ export function Crowd({ beat }: { beat: Beat }) {
     <motion.div
       className="absolute inset-0"
       initial={false}
-      animate={{ opacity: presence ? 1 : 0, scale: amongThem ? pullBackFrom : 1 }}
-      transition={{
-        duration: 0.8,
-        ease: sceneEase,
-        scale: { duration: pullBackSeconds, ease: sceneEase },
-      }}
+      animate={capped ? flyThrough.animate : { opacity: presence ? 1 : 0, scale: amongThem ? pullBackFrom : 1 }}
+      transition={
+        capped
+          ? flyThrough.transition
+          : { duration: 0.8, ease: sceneEase, scale: { duration: pullBackSeconds, ease: sceneEase } }
+      }
       aria-hidden
     >
       {people.map((person, order) => {
