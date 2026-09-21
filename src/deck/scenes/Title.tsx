@@ -72,10 +72,22 @@ function useLoopProgress() {
   return useTransform(time, (elapsed) => (elapsed % loopMs) / loopMs);
 }
 
-export function Title({ beat }: { beat: Beat }) {
-  const visible = beat === "title";
+// The figure putting the cap on while a reticle hunts for it, on a loop. The
+// deck opens on this and closes on it, so it is defined once here.
+export function CloakLoop() {
   const progress = useLoopProgress();
   const inBrowser = useIsBrowser();
+  if (!inBrowser) return null;
+  return (
+    <>
+      <CloakedPerson progress={progress} />
+      <HuntingReticle progress={progress} />
+    </>
+  );
+}
+
+export function Title({ beat }: { beat: Beat }) {
+  const visible = beat === "title";
   return (
     <motion.div
       className="pointer-events-none absolute inset-0"
@@ -91,8 +103,7 @@ export function Title({ beat }: { beat: Beat }) {
       >
         Cloak
       </motion.h2>
-      {inBrowser && <CloakedPerson progress={progress} />}
-      {inBrowser && <HuntingReticle progress={progress} />}
+      <CloakLoop />
       <ul className="type-label absolute bottom-[110px] left-[150px] flex gap-14 text-[34px] font-medium text-ink-muted">
         {members.map((name) => (
           <li key={name}>{name}</li>

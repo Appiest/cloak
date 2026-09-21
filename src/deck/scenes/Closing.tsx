@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import { sceneEase, sceneMove } from "../motion";
 import { isAtOrAfter, type Beat } from "../script";
+import { CloakLoop } from "./Title";
 
 const photo = { x: 430, y: 110, w: 1060, h: 707 };
 
@@ -61,6 +62,7 @@ export function Closing({ beat }: { beat: Beat }) {
   return (
     <div className="pointer-events-none absolute inset-0">
       <Blackout firing={beat === "together"} />
+      <ClosingLoop shown={beat === "thanks"} />
       <motion.h2
         className="type-display absolute inset-x-0 top-[70px] text-center text-[260px] text-ink"
         initial={false}
@@ -87,5 +89,20 @@ function Blackout({ firing }: { firing: boolean }) {
       transition={firing ? { duration: 1.6, times: [0, 0.4, 1], ease: sceneEase, delay: 0.7 } : { duration: 0.3 }}
       aria-hidden
     />
+  );
+}
+
+// The deck closes on the image it opened with: the same figure, the same cap,
+// the same reticle hunting. This time we have watched it fail.
+function ClosingLoop({ shown }: { shown: boolean }) {
+  return (
+    <motion.div
+      className="pointer-events-none absolute inset-0"
+      initial={false}
+      animate={{ opacity: shown ? 1 : 0 }}
+      transition={{ duration: shown ? 1.1 : 0.4, ease: sceneEase, delay: shown ? 0.5 : 0 }}
+    >
+      <CloakLoop />
+    </motion.div>
   );
 }
