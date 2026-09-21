@@ -2,10 +2,13 @@
 
 import { motion } from "motion/react";
 
+// Rounded to two places: React serialises a style number to fewer significant
+// digits on the server than the client writes, so a raw sine value hydrates as
+// a mismatch.
 const bars = Array.from({ length: 36 }, (_, index) => {
   const envelope = Math.sin((index / 35) * Math.PI);
   const texture = 0.45 + 0.55 * Math.abs(Math.sin(index * 2.3));
-  return Math.max(0.08, envelope * texture);
+  return Math.round(Math.max(0.08, envelope * texture) * 10000) / 100;
 });
 
 export function Waveform({ barClassName = "bg-figure" }: { barClassName?: string }) {
@@ -15,7 +18,7 @@ export function Waveform({ barClassName = "bg-figure" }: { barClassName?: string
         <motion.span
           key={index}
           className={`w-2.5 rounded-full ${barClassName}`}
-          style={{ height: `${height * 100}%` }}
+          style={{ height: `${height}%` }}
           animate={{ scaleY: [1, 0.35, 0.8, 0.5, 1] }}
           transition={{
             duration: 1.6,
