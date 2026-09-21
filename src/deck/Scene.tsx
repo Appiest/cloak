@@ -4,6 +4,7 @@
 import { BackdropWord } from "./scenes/BackdropWord";
 import { Closing, TakeHome } from "./scenes/Closing";
 import { Counted } from "./scenes/Counted";
+import { Intertwined } from "./scenes/Intertwined";
 import { Demo } from "./scenes/Demo";
 import { Crowd } from "./scenes/Crowd";
 import { FeedWall } from "./scenes/FeedWall";
@@ -45,6 +46,7 @@ export function Scene({ beat }: { beat: Beat }) {
       <WatchRoomForeground beat={beat} pull={pull} />
       <Demo beat={beat} />
       <TakeHome beat={beat} />
+      <Intertwined beat={beat} />
       <Closing beat={beat} />
       <Question beat={beat} />
       <Reveal beat={beat} />
