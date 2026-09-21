@@ -1,7 +1,7 @@
 "use client";
 
 import { MotionConfig } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Scene } from "./Scene";
 import { DemoVideo } from "./scenes/DemoVideo";
 import { PrototypePhoto } from "./scenes/Closing";
@@ -10,9 +10,11 @@ import { Rehearsal } from "./Rehearsal";
 import { Stage } from "./Stage";
 import { advance, last, retreat, start, toSearch, type Position } from "./timeline";
 import { useDeckControls } from "./useDeckControls";
+import { notesShown, notesShownOnServer, subscribeToNotes, toggleNotes } from "./notes";
 
 export function Deck({ initial }: { initial: Position }) {
   const [position, setPosition] = useState(initial);
+  const showingNotes = useSyncExternalStore(subscribeToNotes, notesShown, notesShownOnServer);
 
   const commands = useMemo(
     () => ({
@@ -20,6 +22,7 @@ export function Deck({ initial }: { initial: Position }) {
       previous: () => setPosition((current) => retreat(current, outline)),
       first: () => setPosition(start),
       last: () => setPosition(last(outline)),
+      notes: toggleNotes,
     }),
     [],
   );
@@ -28,6 +31,7 @@ export function Deck({ initial }: { initial: Position }) {
   useEffect(() => {
     window.history.replaceState(null, "", `${window.location.pathname}${toSearch(position)}`);
   }, [position]);
+
 
   const beat = slides[position.slide].beats[position.beat];
 
@@ -48,7 +52,7 @@ export function Deck({ initial }: { initial: Position }) {
         >
           <Scene beat={beat} />
         </Stage>
-        <Rehearsal position={position} beat={beat} />
+        <Rehearsal position={position} beat={beat} shown={showingNotes} />
       </main>
     </MotionConfig>
   );

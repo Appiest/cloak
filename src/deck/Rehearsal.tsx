@@ -2,8 +2,11 @@ import { cues } from "./cues";
 import type { Beat } from "./script";
 import type { Position } from "./timeline";
 
-export function Rehearsal({ position, beat }: { position: Position; beat: Beat }) {
+type RehearsalProps = { position: Position; beat: Beat; shown: boolean };
+
+export function Rehearsal({ position, beat, shown }: RehearsalProps) {
   const cue = cues[beat];
+  if (!shown) return null;
   return (
     <div
       data-rehearsal
