@@ -7,10 +7,6 @@ import { Brackets } from "../parts/Brackets";
 import { Figure } from "../parts/Figure";
 import type { Beat } from "../script";
 
-export type ManipulatedVariant = "faces" | "strings";
-
-export const variant: ManipulatedVariant = "faces";
-
 // You are nearest the camera and largest; the people around you sit behind and
 // smaller, so "closest to you" reads as proximity rather than a lineup.
 const you = standingAt(560, 980, 560);
@@ -47,7 +43,7 @@ export function Manipulated({ beat }: { beat: Beat }) {
     <div className="pointer-events-none absolute inset-0">
       <StolenBody shown={stage.present} />
       <ClosestPeople shown={stage.exploiting} />
-      {variant === "faces" ? <LiftedFace stage={stage} /> : <ControlLines stage={stage} />}
+      <LiftedFace stage={stage} />
       <MarkedAsYou shown={stage.framing || stage.exploiting} />
     </div>
   );
@@ -151,60 +147,5 @@ function LiftedFace({ stage }: { stage: Stage }) {
         ))}
       </motion.g>
     </motion.svg>
-  );
-}
-
-const rigPoints = [
-  { x: 100, y: 30 },
-  { x: 74, y: 96 },
-  { x: 126, y: 96 },
-  { x: 84, y: 178 },
-  { x: 116, y: 178 },
-];
-
-function ControlLines({ stage }: { stage: Stage }) {
-  const rigged = stage.impersonating || stage.framing || stage.exploiting;
-  const reaching = stage.exploiting;
-  return (
-    <motion.svg
-      className="absolute inset-0 size-full overflow-visible"
-      viewBox="0 0 1920 1080"
-      initial={false}
-      animate={{ opacity: rigged ? 1 : 0 }}
-      transition={quickFade}
-      aria-hidden
-    >
-      {rigPoints.map((point, index) => (
-        <Thread key={`you-${point.x}-${point.y}`} target={pointOnFigure(you, point.x, point.y)} shown={rigged} delay={index * 0.09} />
-      ))}
-      {closest.map((place, index) =>
-        rigPoints.slice(0, 3).map((point) => (
-          <Thread
-            key={`near-${place.x}-${point.x}`}
-            target={pointOnFigure(place, point.x, point.y)}
-            shown={reaching}
-            delay={0.5 + index * 0.2}
-          />
-        )),
-      )}
-    </motion.svg>
-  );
-}
-
-function Thread({ target, shown, delay }: { target: { x: number; y: number }; shown: boolean; delay: number }) {
-  return (
-    <motion.line
-      x1={target.x}
-      y1={-60}
-      x2={target.x}
-      y2={target.y}
-      stroke="var(--color-mark)"
-      strokeWidth="2"
-      opacity="0.8"
-      style={{ filter: "drop-shadow(0 0 8px var(--color-mark-glow))" }}
-      initial={false}
-      animate={{ pathLength: shown ? 1 : 0, opacity: shown ? 0.8 : 0 }}
-      transition={{ duration: 0.7, ease: sceneEase, delay: shown ? delay : 0 }}
-    />
   );
 }
