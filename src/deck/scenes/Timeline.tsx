@@ -53,7 +53,7 @@ function headingAt(t: number): number {
 // The law sets off first and is still walking when the rocket overtakes it.
 const lawWalkSeconds = 11;
 const rocketDelay = 1.8;
-const flightSeconds = 2.3;
+const flightSeconds = 5;
 
 export function Timeline({ beat }: { beat: Beat }) {
   const onSlide = beat === "watchers" || beat === "protections";

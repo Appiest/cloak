@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, type Easing } from "motion/react";
-import { figureSize, standingAt } from "../geometry";
+import { motion } from "motion/react";
+import { memo } from "react";
+import { figureSize, standingAt, type Placement } from "../geometry";
 import { pick, sceneEase } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Cap } from "../parts/Cap";
@@ -37,7 +38,7 @@ const people = rows.flatMap((row, rowIndex) => {
       mirrored: jitter(index * 7 + rowIndex) > 0.5,
     };
   }).filter((person) => !(row.skipCenter && person.index === Math.floor(row.count / 2)));
-});
+}).map((person) => ({ ...person, place: standingAt(person.centerX, person.feetY, person.height) }));
 
 const pullBackFrom = 2.6;
 const pullBackSeconds = 2.8;
@@ -51,16 +52,19 @@ function waveDelay(centerX: number, feetY: number): number {
   return Math.hypot(centerX - waveOrigin.x, feetY - waveOrigin.y) / waveSpeed;
 }
 
-// Hold while the caps light, fly forward through the crowd, then settle back
-// out onto all of them. The bloom peaks as the camera returns, so the reset is
-// hidden inside the flash and the slide lands on people, not on an empty frame.
-const flyThrough = {
-  animate: { opacity: [1, 1, 1, 1], scale: [1, 1.06, 2.6, 1] },
-  transition: {
-    duration: 3.6,
-    times: [0, 0.3, 0.68, 1],
-    ease: ["easeInOut", "easeIn", "easeOut"] satisfies Easing[],
-  },
+// One person at the very back, nearest the middle: the camera picks them out
+// and closes on them.
+const farthest = people
+  .filter((person) => person.height <= 70)
+  .reduce((best, person) => (Math.abs(person.centerX - 960) < Math.abs(best.centerX - 960) ? person : best));
+
+const focus = { x: farthest.centerX, y: farthest.feetY - farthest.height / 2 };
+
+// A single target rather than keyframes, so an early click retargets from
+// wherever the move has got to instead of snapping back to the first frame.
+const closeIn = {
+  animate: { opacity: 1, scale: 7.5, x: Math.round(960 - focus.x), y: Math.round(540 - focus.y) },
+  transition: { duration: 4.4, delay: 1.1, ease: sceneEase },
 };
 
 export function Crowd({ beat }: { beat: Beat }) {
@@ -73,53 +77,30 @@ export function Crowd({ beat }: { beat: Beat }) {
     <motion.div
       className="absolute inset-0"
       initial={false}
-      animate={capped ? flyThrough.animate : { opacity: presence ? 1 : 0, scale: amongThem ? pullBackFrom : 1 }}
+      style={{ originX: capped ? focus.x / 1920 : 0.5, originY: capped ? focus.y / 1080 : 0.5 }}
+      animate={capped ? closeIn.animate : { opacity: presence ? 1 : 0, scale: amongThem ? pullBackFrom : 1, x: 0, y: 0 }}
       transition={
         capped
-          ? flyThrough.transition
+          ? closeIn.transition
           : { duration: 0.8, ease: sceneEase, scale: { duration: pullBackSeconds, ease: sceneEase } }
       }
       aria-hidden
     >
-      {people.map((person, order) => {
-        const place = standingAt(person.centerX, person.feetY, person.height);
-        return (
-          <motion.div
-            key={person.id}
-            className="absolute left-0 top-0 origin-top-left"
-            style={{ width: figureSize.w, height: figureSize.h, x: place.x, y: place.y, scale: place.scale }}
-            initial={false}
-            animate={{ opacity: presence * person.tone }}
-            transition={{ duration: 0.8, ease: sceneEase, delay: watched ? 0.25 + order * 0.012 : 0 }}
-          >
-            <Figure mirrored={person.mirrored} className="size-full" />
-            <motion.div
-              className="absolute inset-0"
-              initial={false}
-              animate={{ opacity: capped ? 1 : 0, y: capped ? 0 : -60 }}
-              transition={{
-                duration: 0.45,
-                ease: sceneEase,
-                delay: capped ? 0.35 + waveDelay(person.centerX, person.feetY) : 0,
-              }}
-            >
-              <Cap className="size-full" glowing={capped} />
-            </motion.div>
-            <motion.div
-              className="absolute -inset-x-10 -inset-y-8"
-              initial={false}
-              animate={{ opacity: watched ? 1 : 0, scale: watched ? 1 : released ? 1.6 : 1.15 }}
-              transition={{
-                duration: released ? 0.5 : 0.4,
-                ease: sceneEase,
-                delay: bracketDelay(watched, released, order, person),
-              }}
-            >
-              <Brackets arm={70} weight={10} />
-            </motion.div>
-          </motion.div>
-        );
-      })}
+      {people.map((person, order) => (
+        <CrowdPerson
+          key={person.id}
+          place={person.place}
+          mirrored={person.mirrored}
+          opacity={capped ? (person.id === farthest.id ? 1 : 0.1) : presence * person.tone}
+          enterDelay={capped ? 2 : watched ? 0.25 + order * 0.012 : 0}
+          enterDuration={capped ? 2 : 0.8}
+          capped={capped}
+          capDelay={capped ? 0.35 + waveDelay(person.centerX, person.feetY) : 0}
+          watched={watched}
+          released={released}
+          bracketDelay={bracketDelay(watched, released, order, person)}
+        />
+      ))}
     </motion.div>
   );
 }
@@ -129,3 +110,49 @@ function bracketDelay(watched: boolean, released: boolean, order: number, person
   if (released) return 0.3 + waveDelay(person.centerX, person.feetY);
   return 0;
 }
+
+type CrowdPersonProps = {
+  place: Placement;
+  mirrored: boolean;
+  opacity: number;
+  enterDelay: number;
+  enterDuration: number;
+  capped: boolean;
+  capDelay: number;
+  watched: boolean;
+  released: boolean;
+  bracketDelay: number;
+};
+
+// Memoised on primitives and a stable placement. Every scene stays mounted, so
+// without this the whole crowd re-renders on every beat change in the deck.
+const CrowdPerson = memo(function CrowdPerson(props: CrowdPersonProps) {
+  const { place, mirrored, opacity, enterDelay, enterDuration, capped, capDelay, watched, released, bracketDelay } = props;
+  return (
+    <motion.div
+      className="absolute left-0 top-0 origin-top-left"
+      style={{ width: figureSize.w, height: figureSize.h, x: place.x, y: place.y, scale: place.scale }}
+      initial={false}
+      animate={{ opacity }}
+      transition={{ duration: enterDuration, ease: sceneEase, delay: enterDelay }}
+    >
+      <Figure mirrored={mirrored} className="size-full" />
+      <motion.div
+        className="absolute inset-0"
+        initial={false}
+        animate={{ opacity: capped ? 1 : 0, y: capped ? 0 : -60 }}
+        transition={{ duration: 0.45, ease: sceneEase, delay: capDelay }}
+      >
+        <Cap className="size-full" glowing={capped} />
+      </motion.div>
+      <motion.div
+        className="absolute -inset-x-10 -inset-y-8"
+        initial={false}
+        animate={{ opacity: watched ? 1 : 0, scale: watched ? 1 : released ? 1.6 : 1.15 }}
+        transition={{ duration: released ? 0.5 : 0.4, ease: sceneEase, delay: bracketDelay }}
+      >
+        <Brackets arm={70} weight={10} />
+      </motion.div>
+    </motion.div>
+  );
+});
