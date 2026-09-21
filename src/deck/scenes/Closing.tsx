@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import { sceneEase, sceneMove } from "../motion";
 import { isAtOrAfter, type Beat } from "../script";
-import { CloakLoop } from "./Title";
+import { capCentre, CloakLoop } from "./Title";
 
 const photo = { x: 430, y: 110, w: 1060, h: 707 };
 
@@ -92,17 +92,45 @@ function Blackout({ firing }: { firing: boolean }) {
   );
 }
 
-// The deck closes on the image it opened with: the same figure, the same cap,
-// the same reticle hunting. This time we have watched it fail.
+// The deck closes on the image it opened with, but held close: the figure
+// centred and cropped at the torso, the cap lit, and the reticle still hunting.
+// By now the audience has watched it fail.
+const capAt = capCentre("closeUp");
+
 function ClosingLoop({ shown }: { shown: boolean }) {
   return (
     <motion.div
       className="pointer-events-none absolute inset-0"
       initial={false}
-      animate={{ opacity: shown ? 1 : 0 }}
-      transition={{ duration: shown ? 1.1 : 0.4, ease: sceneEase, delay: shown ? 0.5 : 0 }}
+      animate={{ opacity: shown ? 1 : 0, scale: shown ? 1 : 1.14 }}
+      transition={{
+        opacity: { duration: shown ? 2.2 : 0.5, ease: sceneEase, delay: shown ? 0.8 : 0 },
+        scale: { duration: shown ? 4.5 : 0, ease: sceneEase, delay: shown ? 0.4 : 0 },
+      }}
     >
-      <CloakLoop />
+      <CapLight shown={shown} />
+      {shown && <CloakLoop framing="closeUp" />}
     </motion.div>
+  );
+}
+
+// A gradient rather than a filter, so scaling it cannot hit the rasteriser
+// ceiling that stopped the watcher painting on slide 3.
+function CapLight({ shown }: { shown: boolean }) {
+  return (
+    <motion.div
+      className="absolute rounded-full mix-blend-screen"
+      style={{
+        left: capAt.x - 620,
+        top: capAt.y - 620,
+        width: 1240,
+        height: 1240,
+        background: "radial-gradient(closest-side, oklch(1 0 0 / 0.16), oklch(1 0 0 / 0.05) 55%, transparent)",
+      }}
+      initial={false}
+      animate={{ opacity: shown ? 1 : 0, scale: shown ? 1 : 0.7 }}
+      transition={{ duration: shown ? 3.2 : 0.4, ease: sceneEase, delay: shown ? 1.4 : 0 }}
+      aria-hidden
+    />
   );
 }

@@ -2,7 +2,7 @@
 
 import { motion, useTime, useTransform, type MotionValue } from "motion/react";
 import { useSyncExternalStore } from "react";
-import { figureSize } from "../geometry";
+import { figureSize, pointOnFigure, standingAt } from "../geometry";
 import { sceneEase, sceneMove } from "../motion";
 import { Brackets } from "../parts/Brackets";
 import { Cap } from "../parts/Cap";
@@ -15,19 +15,51 @@ import { walkStart } from "./WalkHome";
 const members = ["Brendan Giang", "Matthew Carlin", "Alex Tully", "Christine Wu", "Ada Morris"];
 
 const loopMs = 12000;
-const person = walkStart;
-const lock = { x: 1400, y: 300, width: 300, height: 640 };
-const roaming = { width: 220, height: 260 };
 
-const hunt = {
-  times: [0, 0.12, 0.24, 0.34, 0.4, 0.84, 0.89, 0.95, 1],
-  x: [1180, 420, 760, 1150, lock.x, lock.x, 900, 560, 1180],
-  y: [210, 300, 560, 420, lock.y, lock.y, 200, 520, 210],
-  width: [roaming.width, roaming.width, roaming.width, roaming.width, lock.width, lock.width, roaming.width, roaming.width, roaming.width],
-  height: [roaming.height, roaming.height, roaming.height, roaming.height, lock.height, lock.height, roaming.height, roaming.height, roaming.height],
+// Two ways to frame the same loop. The wide shot the deck opens on runs the
+// full cycle, cap on and off, and the reticle finds its target. The close-up it
+// ends on plays once and stops with the cap on: the search never succeeds.
+const framings = {
+  wide: {
+    person: walkStart,
+    hunt: {
+      times: [0, 0.12, 0.24, 0.34, 0.4, 0.84, 0.89, 0.95, 1],
+      x: [1180, 420, 760, 1150, 1400, 1400, 900, 560, 1180],
+      y: [210, 300, 560, 420, 300, 300, 200, 520, 210],
+      width: [220, 220, 220, 220, 300, 300, 220, 220, 220],
+      height: [260, 260, 260, 260, 640, 640, 260, 260, 260],
+    },
+    labels: { times: [0, 0.39, 0.41, 0.82, 0.84, 1], searching: [1, 1, 0, 0, 1, 1], found: [0, 0, 1, 1, 0, 0] },
+  },
+  closeUp: {
+    person: standingAt(960, 2350, 2100),
+    // Never settles on him. It sweeps the frame and keeps missing.
+    hunt: {
+      // The last keyframe is where it comes to rest when the sequence holds, so
+      // it has to sit clear of him rather than parked across the cap.
+      times: [0, 0.15, 0.3, 0.45, 0.6, 0.7, 1],
+      x: [1500, 300, 1450, 260, 1520, 250, 250],
+      y: [180, 720, 760, 200, 420, 650, 650],
+      width: [320, 320, 320, 320, 320, 320, 320],
+      height: [300, 300, 300, 300, 300, 300, 300],
+    },
+    labels: { times: [0, 1], searching: [1, 1], found: [0, 0] },
+  },
 };
 
-const labels = { times: [0, 0.39, 0.41, 0.82, 0.84, 1], searching: [1, 1, 0, 0, 1, 1], found: [0, 0, 1, 1, 0, 0] };
+export type LoopFraming = keyof typeof framings;
+
+// Where the cap sits in canvas space, so a scene can light it.
+export function capCentre(framing: LoopFraming) {
+  return pointOnFigure(framings[framing].person, 100, 45);
+}
+
+// The close-up runs once and stops here: cap on, lit, and he is still visible.
+// Further along the cycle he fades out entirely, which leaves nothing to look
+// at on the slide that is meant to be about the cap.
+const finaleMs = 9000;
+const finaleEnd = 0.7;
+
 
 const capGrip = { x: 136, y: 56 };
 const holding: Limb = { upper: -12, lower: 8 };
@@ -67,21 +99,25 @@ function useIsBrowser() {
   return useSyncExternalStore(noSubscription, () => true, () => false);
 }
 
-function useLoopProgress() {
+function useLoopProgress(framing: LoopFraming) {
   const time = useTime();
-  return useTransform(time, (elapsed) => (elapsed % loopMs) / loopMs);
+  return useTransform(time, (elapsed) =>
+    framing === "closeUp"
+      ? Math.min(elapsed / finaleMs, 1) * finaleEnd
+      : (elapsed % loopMs) / loopMs,
+  );
 }
 
 // The figure putting the cap on while a reticle hunts for it, on a loop. The
 // deck opens on this and closes on it, so it is defined once here.
-export function CloakLoop() {
-  const progress = useLoopProgress();
+export function CloakLoop({ framing = "wide" }: { framing?: LoopFraming }) {
+  const progress = useLoopProgress(framing);
   const inBrowser = useIsBrowser();
   if (!inBrowser) return null;
   return (
     <>
-      <CloakedPerson progress={progress} />
-      <HuntingReticle progress={progress} />
+      <CloakedPerson progress={progress} framing={framing} />
+      <HuntingReticle progress={progress} framing={framing} />
     </>
   );
 }
@@ -113,9 +149,10 @@ export function Title({ beat }: { beat: Beat }) {
   );
 }
 
-type LoopProps = { progress: MotionValue<number> };
+type LoopProps = { progress: MotionValue<number>; framing: LoopFraming };
 
-function HuntingReticle({ progress }: LoopProps) {
+function HuntingReticle({ progress, framing }: LoopProps) {
+  const { hunt, labels } = framings[framing];
   const x = useTransform(progress, hunt.times, hunt.x, easeInOut);
   const y = useTransform(progress, hunt.times, hunt.y, easeInOut);
   const width = useTransform(progress, hunt.times, hunt.width, easeInOut);
@@ -139,7 +176,8 @@ function HuntingReticle({ progress }: LoopProps) {
 
 const figureUnit = figureSize.w / 200;
 
-function CloakedPerson({ progress }: LoopProps) {
+function CloakedPerson({ progress, framing }: LoopProps) {
+  const person = framings[framing].person;
   const pose = useTransform(progress, titlePose);
   const opacity = useTransform(progress, presence.times, presence.values);
   const bloomOpacity = useTransform(progress, bloom.times, bloom.opacity);
@@ -168,7 +206,7 @@ function CloakedPerson({ progress }: LoopProps) {
   );
 }
 
-function HeldCap({ progress }: LoopProps) {
+function HeldCap({ progress }: { progress: MotionValue<number> }) {
   const onHead = useTransform(progress, worn.times, worn.values);
   const x = useTransform([progress, onHead], ([at, placed]: number[]) => (1 - placed) * (handAt(at).x - capGrip.x) * figureUnit);
   const y = useTransform([progress, onHead], ([at, placed]: number[]) => (1 - placed) * (handAt(at).y - capGrip.y) * figureUnit);
