@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
+import { memo } from "react";
 import { standingAt, type Placement } from "../geometry";
 import { quickFade, sceneEase } from "../motion";
 import { CountUp } from "../parts/CountUp";
@@ -85,9 +86,27 @@ export function Counted({ beat }: { beat: Beat }) {
   const layout = layouts[beat] ?? weekGrid;
   return (
     <div className="pointer-events-none absolute inset-0">
-      {cellIndexes.map((index) => (
-        <Cell key={index} index={index} beat={beat} layout={layout} highlighted={stat?.highlighted ?? 0} />
-      ))}
+      {cellIndexes.map((index) => {
+        const origin = cellOrigin(layout, index);
+        const tone = cellTone(beat, index, stat?.highlighted ?? 0);
+        const marked = beat === "foundCamera" && index < (stat?.highlighted ?? 0);
+        const visible = beat in layouts && index < layout.count;
+        return (
+          <Cell
+            key={index}
+            index={index}
+            x={origin.x}
+            y={origin.y}
+            size={layout.cell}
+            visible={visible}
+            background={tone.background}
+            figureOpacity={tone.figure}
+            dotOn={marked || beat === "perDay"}
+            enterDelay={visible ? cellDelay(beat, index) : 0}
+            dotDelay={seenDotDelay(beat, marked, index)}
+          />
+        );
+      })}
       <AnimatePresence>
         {stat && (
           <motion.div
@@ -135,32 +154,36 @@ export function Counted({ beat }: { beat: Beat }) {
   );
 }
 
-type CellProps = { index: number; beat: Beat; layout: GridLayout; highlighted: number };
+type CellProps = {
+  index: number;
+  x: number;
+  y: number;
+  size: number;
+  visible: boolean;
+  background: string;
+  figureOpacity: number;
+  dotOn: boolean;
+  enterDelay: number;
+  dotDelay: number;
+};
 
-function Cell({ index, beat, layout, highlighted }: CellProps) {
-  const visible = beat in layouts && index < layout.count;
-  const origin = cellOrigin(layout, index);
-  const tone = cellTone(beat, index, highlighted);
-  const marked = beat === "foundCamera" && index < highlighted;
+// Memoised on primitives. Every scene stays mounted, so without this all 238
+// cells re-render on every beat change in the deck, including the eleven beats
+// where this slide is not on screen at all.
+const Cell = memo(function Cell(props: CellProps) {
+  const { index, x, y, size, visible, background, figureOpacity, dotOn, enterDelay, dotDelay } = props;
   return (
     <motion.div
       className="absolute left-0 top-0 overflow-hidden"
       initial={false}
-      animate={{
-        x: origin.x,
-        y: origin.y,
-        width: layout.cell,
-        height: layout.cell,
-        opacity: visible ? 1 : 0,
-        backgroundColor: tone.background,
-      }}
-      transition={{ duration: 0.9, ease: sceneEase, delay: visible ? cellDelay(beat, index) : 0 }}
+      animate={{ x, y, width: size, height: size, opacity: visible ? 1 : 0, backgroundColor: background }}
+      transition={{ duration: 0.9, ease: sceneEase, delay: enterDelay }}
     >
       {index > 0 && (
         <motion.div
           className="absolute inset-x-0 bottom-1 mx-auto h-4/5 w-1/3"
           initial={false}
-          animate={{ opacity: tone.figure }}
+          animate={{ opacity: figureOpacity }}
           transition={quickFade}
         >
           <Figure className="size-full" />
@@ -170,12 +193,12 @@ function Cell({ index, beat, layout, highlighted }: CellProps) {
         className="absolute right-1.5 top-1.5 size-2 rounded-full bg-mark"
         style={{ boxShadow: "0 0 10px 2px var(--color-mark-glow)" }}
         initial={false}
-        animate={{ opacity: marked || beat === "perDay" ? 1 : 0 }}
-        transition={{ ...quickFade, delay: seenDotDelay(beat, marked, index) }}
+        animate={{ opacity: dotOn ? 1 : 0 }}
+        transition={{ ...quickFade, delay: dotDelay }}
       />
     </motion.div>
   );
-}
+});
 
 function cellDelay(beat: Beat, index: number): number {
   if (beat === "perDay") return 0.2 + index * 0.004;

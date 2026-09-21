@@ -65,7 +65,7 @@ export function Closing({ beat }: { beat: Beat }) {
         className="type-display absolute inset-x-0 top-[70px] text-center text-[260px] text-ink"
         initial={false}
         animate={{ opacity: wordmarkUp ? 1 : 0, y: wordmarkUp ? 0 : -30 }}
-        transition={{ duration: 1.2, ease: sceneEase, delay: beat === "together" ? 3.4 : 0 }}
+        transition={{ duration: 1.2, ease: sceneEase, delay: beat === "together" ? 4.4 : 0 }}
       >
         Cloak
       </motion.h2>
@@ -84,7 +84,7 @@ function Blackout({ firing }: { firing: boolean }) {
       style={{ background: "radial-gradient(closest-side, oklch(1 0 0 / 0.95), oklch(1 0 0 / 0.35) 55%, transparent)" }}
       initial={false}
       animate={firing ? { opacity: [0, 1, 0], scale: [0.3, 3.2, 4] } : { opacity: 0, scale: 0.3 }}
-      transition={firing ? { duration: 1.7, times: [0, 0.38, 1], ease: sceneEase, delay: 1.8 } : { duration: 0.3 }}
+      transition={firing ? { duration: 1.6, times: [0, 0.4, 1], ease: sceneEase, delay: 0.7 } : { duration: 0.3 }}
       aria-hidden
     />
   );

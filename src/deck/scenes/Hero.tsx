@@ -42,7 +42,17 @@ const placements: Record<Beat, Placement> = {
   thanks: standingAt(960, 930, 230),
 };
 
-const hiddenOn: Partial<Record<Beat, boolean>> = { title: true, who: true, watchers: true, protections: true, takeHome: true };
+// together closes on a single figure at the back of the crowd, so the hero
+// steps out rather than competing with it in the same frame.
+const hiddenOn: Partial<Record<Beat, boolean>> = {
+  title: true,
+  who: true,
+  watchers: true,
+  protections: true,
+  takeHome: true,
+  together: true,
+  thanks: true,
+};
 
 const losingLock = {
   animate: { opacity: [0, 1, 1, 0], scale: [1.12, 1, 1, 1.12] },
