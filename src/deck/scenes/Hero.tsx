@@ -35,7 +35,9 @@ const placements: Record<Beat, Placement> = {
   video: heroInside(wallTiles[0]),
   takeHome: standingAt(960, 1400, 640),
   humanFirst: center,
-  flock: standingAt(960, 930, 230),
+  flockNetwork: standingAt(960, 930, 230),
+  nationwide: standingAt(960, 930, 230),
+  frontierModels: standingAt(960, 930, 230),
   together: standingAt(960, 930, 230),
   thanks: standingAt(960, 930, 230),
 };
@@ -49,7 +51,7 @@ const losingLock = {
 
 function detection(beat: Beat) {
   if (beat === "demo") return losingLock;
-  const detected = pick({ watched: 1, unseen: 1, everywhere: 1, who: 1, reality: 1, flock: 1 }, beat, 0);
+  const detected = pick({ watched: 1, unseen: 1, everywhere: 1, who: 1, reality: 1, flockNetwork: 1, nationwide: 1 }, beat, 0);
   return { animate: { opacity: detected, scale: detected ? 1 : 1.12 }, transition: quickFade };
 }
 

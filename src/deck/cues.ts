@@ -62,9 +62,11 @@ export const cues: Record<Beat, Cue | undefined> = {
     speaker: "Christine",
     line: "Protecting humans from machine intelligence means putting human safety first.",
   },
-  flock: {
+  flockNetwork: { speaker: "Brendan", line: "With the rise of Flock," },
+  nationwide: { speaker: "Brendan", line: "the rapid increase in national surveillance," },
+  frontierModels: {
     speaker: "Brendan",
-    line: "With the rise of Flock, the rapid increase in national surveillance, and the advancement of frontier AI models, your safety is deeply intertwined with who has access to your image and your voice.",
+    line: "and the advancement of frontier AI models, your safety is deeply intertwined with who has access to your image and your voice.",
   },
   together: {
     speaker: "Brendan",

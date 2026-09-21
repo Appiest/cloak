@@ -64,8 +64,8 @@ const flyThrough = {
 };
 
 export function Crowd({ beat }: { beat: Beat }) {
-  const presence = pick({ reality: 1, whatNow: 0.14, flock: 1, together: 1 }, beat, 0);
-  const watched = beat === "reality" || beat === "flock";
+  const presence = pick({ reality: 1, whatNow: 0.14, flockNetwork: 0.5, nationwide: 0.5, frontierModels: 0.18, together: 1 }, beat, 0);
+  const watched = beat === "reality";
   const capped = beat === "together";
   const released = capped;
   const amongThem = beat === "who";
