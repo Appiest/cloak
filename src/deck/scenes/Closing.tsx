@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import Image from "next/image";
+import { assetPath } from "../assetPath";
 import { sceneEase, sceneMove } from "../motion";
 import { isAtOrAfter, type Beat } from "../script";
 import { capCentre, CloakLoop } from "./Title";
@@ -30,7 +31,7 @@ export function PrototypePhoto({ beat }: { beat: Beat }) {
       transition={{ ...sceneMove, delay: visible ? 0.25 : 0 }}
     >
       <Image
-        src="/photos/prototype-front.jpg"
+        src={assetPath("/photos/prototype-front.jpg")}
         alt="The Cloak prototype: a black baseball cap with an ultrasonic transducer module mounted on the front panel"
         width={1536}
         height={1024}
