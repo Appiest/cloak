@@ -2,8 +2,10 @@
 
 import { motion } from "motion/react";
 import Image from "next/image";
+import { assetPath } from "../assetPath";
 import { sceneEase, sceneMove } from "../motion";
 import { isAtOrAfter, type Beat } from "../script";
+import { capCentre, CloakLoop } from "./Title";
 
 const photo = { x: 430, y: 110, w: 1060, h: 707 };
 
@@ -29,7 +31,7 @@ export function PrototypePhoto({ beat }: { beat: Beat }) {
       transition={{ ...sceneMove, delay: visible ? 0.25 : 0 }}
     >
       <Image
-        src="/photos/prototype-front.jpg"
+        src={assetPath("/photos/prototype-front.jpg")}
         alt="The Cloak prototype: a black baseball cap with an ultrasonic transducer module mounted on the front panel"
         width={1536}
         height={1024}
@@ -61,6 +63,7 @@ export function Closing({ beat }: { beat: Beat }) {
   return (
     <div className="pointer-events-none absolute inset-0">
       <Blackout firing={beat === "together"} />
+      <ClosingLoop shown={beat === "thanks"} />
       <motion.h2
         className="type-display absolute inset-x-0 top-[70px] text-center text-[260px] text-ink"
         initial={false}
@@ -85,6 +88,49 @@ function Blackout({ firing }: { firing: boolean }) {
       initial={false}
       animate={firing ? { opacity: [0, 1, 0], scale: [0.3, 3.2, 4] } : { opacity: 0, scale: 0.3 }}
       transition={firing ? { duration: 1.6, times: [0, 0.4, 1], ease: sceneEase, delay: 0.7 } : { duration: 0.3 }}
+      aria-hidden
+    />
+  );
+}
+
+// The deck closes on the image it opened with, but held close: the figure
+// centred and cropped at the torso, the cap lit, and the reticle still hunting.
+// By now the audience has watched it fail.
+const capAt = capCentre("closeUp");
+
+function ClosingLoop({ shown }: { shown: boolean }) {
+  return (
+    <motion.div
+      className="pointer-events-none absolute inset-0"
+      initial={false}
+      animate={{ opacity: shown ? 1 : 0, scale: shown ? 1 : 1.14 }}
+      transition={{
+        opacity: { duration: shown ? 2.2 : 0.5, ease: sceneEase, delay: shown ? 0.8 : 0 },
+        scale: { duration: shown ? 4.5 : 0, ease: sceneEase, delay: shown ? 0.4 : 0 },
+      }}
+    >
+      <CapLight shown={shown} />
+      {shown && <CloakLoop framing="closeUp" />}
+    </motion.div>
+  );
+}
+
+// A gradient rather than a filter, so scaling it cannot hit the rasteriser
+// ceiling that stopped the watcher painting on slide 3.
+function CapLight({ shown }: { shown: boolean }) {
+  return (
+    <motion.div
+      className="absolute rounded-full mix-blend-screen"
+      style={{
+        left: capAt.x - 620,
+        top: capAt.y - 620,
+        width: 1240,
+        height: 1240,
+        background: "radial-gradient(closest-side, oklch(1 0 0 / 0.16), oklch(1 0 0 / 0.05) 55%, transparent)",
+      }}
+      initial={false}
+      animate={{ opacity: shown ? 1 : 0, scale: shown ? 1 : 0.7 }}
+      transition={{ duration: shown ? 3.2 : 0.4, ease: sceneEase, delay: shown ? 1.4 : 0 }}
       aria-hidden
     />
   );

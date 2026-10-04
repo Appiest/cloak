@@ -2,6 +2,8 @@
 
 This is the pitch deck for Cloak, a cap designed to stop cameras and microphones from recording the person wearing it. The slideshow runs in your web browser, and this guide walks you through opening it on your own computer, step by step.
 
+The quickest way to see it is online at **https://appiest.github.io/cloak**, which updates every time `main` changes. The steps below are for running it on your own computer, which works without an internet connection once it is set up.
+
 You don't need a GitHub account or any programming experience. The first time takes about 10 minutes. After that, it takes about a minute.
 
 ## What you'll need

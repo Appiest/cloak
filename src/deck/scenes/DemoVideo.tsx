@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { useEffect, useRef } from "react";
+import { assetPath } from "../assetPath";
 import { sceneEase } from "../motion";
 import type { Beat } from "../script";
 
@@ -41,7 +42,7 @@ export function DemoVideo({ beat }: { beat: Beat }) {
     >
       <motion.video
         ref={video}
-        src="/video/cloak-demo.mp4"
+        src={assetPath("/video/cloak-demo.mp4")}
         preload="auto"
         playsInline
         className="size-full object-cover"
